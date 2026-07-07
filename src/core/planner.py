@@ -4,15 +4,11 @@ Enhanced TravelPlanner with trip_days and budget support.
 
 import os
 from groq import Groq
-from typing import Optional
-from ..utils.logger import get_logger
+from src.services.storage_service import StorageService
 
 logger = get_logger(__name__)
 
-# ✅ FIX: Model name as constant
-GROQ_MODEL = "llama-3.3-70b-versatile"
 MAX_TOKENS = 8000
-
 
 class TravelPlanner:
     """Travel planner with proper trip_days and budget handling."""
@@ -22,7 +18,8 @@ class TravelPlanner:
         city: str, 
         interests: list, 
         trip_days: int = 1, 
-        budget: str = "Moderate"
+        budget: str = "Moderate",
+        storage_service: StorageService = None
     ):
         """
         Initialize TravelPlanner.
@@ -42,6 +39,7 @@ class TravelPlanner:
             logger.warning(f"Trip days adjusted from {trip_days} to {self.trip_days}")
         
         self.budget = budget
+        self.storage = storage_service or StorageService()
         self.client = self._initialize_client()
         
         logger.info(
@@ -64,12 +62,12 @@ class TravelPlanner:
             raise ValueError("GROQ_API_KEY not found in environment variables")
         return Groq(api_key=api_key)
     
-    def create_itinerary(self) -> str:
+    def create_itinerary(self) -> dict:
         """
         Generate complete itinerary for ALL trip days.
         
         Returns:
-            Complete itinerary as string
+            Dict containing itinerary, prompt_id, and model_id
             
         Raises:
             RuntimeError: If generation fails
@@ -83,47 +81,34 @@ class TravelPlanner:
             # Format interests
             interests_str = ", ".join(self.interests)
             
-            # Build comprehensive prompt with ALL requirements
-            prompt = f"""You are an expert travel planner. Create a COMPLETE {self.trip_days}-day itinerary for {self.city}.
-
-CRITICAL REQUIREMENTS:
-1. YOU MUST CREATE PLANS FOR ALL {self.trip_days} DAYS - DO NOT STOP AT 1-3 DAYS!
-2. Budget Level: {self.budget} - Adjust ALL recommendations accordingly
-3. Cover: {interests_str}
-
-MANDATORY DAY STRUCTURE (ALL {self.trip_days} DAYS):
-Generate detailed plans for Day 1, Day 2, Day 3, ... through Day {self.trip_days}
-
-For EACH of the {self.trip_days} days, include:
-- Morning activities (9 AM - 12 PM) with exact timing
-- Afternoon activities (12 PM - 5 PM) with exact timing
-- Evening activities (5 PM - 10 PM) with exact timing
-
-For EVERY activity provide:
-- Specific venue name, full address, phone number
-- Exact time allocation (e.g., "9:00 AM - 11:00 AM (2 hours)")
-- Precise costs in local currency (matching {self.budget} budget level)
-- Transport directions with costs and time
-- Insider tips and local secrets
-- Opening hours and booking requirements
-- Restaurant recommendations with {self.budget}-appropriate prices
-- Weather alternatives
-- Cultural tips
-
-IMPORTANT REMINDERS:
-- Generate COMPLETE itinerary for ALL {self.trip_days} days
-- DO NOT truncate at Day 1-3
-- Ensure each day has morning, afternoon, and evening plans
-- Match {self.budget} budget level for ALL recommendations
-- Provide 4-5 activities per day
-- Include travel time between locations
-
-Start with Day 1 and continue through Day {self.trip_days}.
-Generate the complete {self.trip_days}-day itinerary now:"""
+            # Fetch active configuration
+            config = self.storage.get_active_config()
+            model_name = config.get('provider_model') if config and config.get('provider_model') else "llama-3.3-70b-versatile"
+            prompt_id = config.get('prompt_id') if config else None
+            model_id = config.get('model_id') if config else None
             
-            # ✅ FIX: Use constant for model
+            # Load active prompt version
+            prompt_template = ""
+            prompt_version_name = config.get('prompt_version') if config else "travel_v1"
+            prompt_file = f"prompts/{prompt_version_name}.md"
+            
+            if os.path.exists(prompt_file):
+                with open(prompt_file, 'r', encoding='utf-8') as f:
+                    prompt_template = f.read()
+            else:
+                # Fallback template
+                prompt_template = "You are an expert travel planner. Create a COMPLETE {trip_days}-day itinerary for {city}. Cover {interests_str} with {budget} budget."
+            
+            # Format the prompt
+            prompt = prompt_template.format(
+                city=self.city,
+                trip_days=self.trip_days,
+                budget=self.budget,
+                interests_str=interests_str
+            )
+            
             response = self.client.chat.completions.create(
-                model=GROQ_MODEL,  # Use constant
+                model=model_name,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.7,
                 max_tokens=MAX_TOKENS,
@@ -158,7 +143,11 @@ Generate the complete {self.trip_days}-day itinerary now:"""
             else:
                 logger.info(f"✅ All {self.trip_days} days generated successfully!")
             
-            return itinerary
+            return {
+                "itinerary_text": itinerary,
+                "prompt_id": prompt_id,
+                "model_id": model_id
+            }
             
         except Exception as e:
             logger.error(f"Error generating itinerary: {e}", exc_info=True)

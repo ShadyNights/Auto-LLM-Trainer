@@ -76,34 +76,41 @@ def create_database():
         return False
 
 def run_schema():
-    """Run database schema."""
+    """Run database schema migrations."""
     print("\n📋 Setting up database schema...")
     
-    schema_file = Path("database_setup_fixed.sql")
+    migrations_dir = Path("migrations")
     
-    if not schema_file.exists():
-        print(f"❌ Schema file not found: {schema_file}")
+    if not migrations_dir.exists():
+        print(f"❌ Migrations directory not found: {migrations_dir}")
+        return False
+        
+    migrations = sorted(list(migrations_dir.glob("*.sql")))
+    if not migrations:
+        print("❌ No migration files found")
         return False
     
-    try:
-        cmd = [
-            "psql", "-U", "postgres",
-            "-d", "travel_planner",
-            "-f", str(schema_file)
-        ]
-        
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        
-        if result.returncode == 0:
-            print("✅ Database schema created")
-            return True
-        else:
-            print(f"❌ Schema setup failed: {result.stderr}")
+    for schema_file in migrations:
+        print(f"   Executing {schema_file.name}...")
+        try:
+            cmd = [
+                "psql", "-U", "postgres",
+                "-d", "travel_planner",
+                "-f", str(schema_file)
+            ]
+            
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            
+            if result.returncode != 0:
+                print(f"❌ Migration {schema_file.name} failed: {result.stderr}")
+                return False
+                
+        except Exception as e:
+            print(f"❌ Error during {schema_file.name}: {e}")
             return False
             
-    except Exception as e:
-        print(f"❌ Error: {e}")
-        return False
+    print("✅ All database migrations applied successfully")
+    return True
 
 def main():
     """Main setup function."""
