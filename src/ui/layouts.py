@@ -37,7 +37,7 @@ class SidebarLayout:
         with st.sidebar:
             components.render_user_profile()
             
-            st.button(f"{Icons.HOME} New Itinerary", use_container_width=True, type="primary")
+            st.button("New Itinerary", use_container_width=True, type="primary", icon=Icons.ADD)
             st.markdown("<hr style='margin: var(--space-4) 0;'/>", unsafe_allow_html=True)
             
             # Workspace Group

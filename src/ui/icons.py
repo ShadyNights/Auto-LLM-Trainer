@@ -1,46 +1,47 @@
 """
 Iconography mapping.
 Centralized repository for UI icons to ensure visual consistency across the app.
+Uses native Streamlit Material symbols integration.
 """
 
 class Icons:
     # Navigation
-    HOME = "home"
-    ADD = "add"
-    DASHBOARD = "dashboard"
-    MAP = "map"
-    ANALYTICS = "analytics"
-    SETTINGS = "settings"
-    HELP = "help"
-    FEEDBACK = "rate_review"
-    MENU = "menu"
-    NOTIFICATIONS = "notifications"
+    HOME = ":material/home:"
+    ADD = ":material/add:"
+    DASHBOARD = ":material/dashboard:"
+    MAP = ":material/map:"
+    ANALYTICS = ":material/analytics:"
+    SETTINGS = ":material/settings:"
+    HELP = ":material/help:"
+    FEEDBACK = ":material/rate_review:"
+    MENU = ":material/menu:"
+    NOTIFICATIONS = ":material/notifications:"
     
     # AI Interactions
-    ROBOT = "robot_2"
-    THINKING = "psychology"
-    SPARKLES = "auto_awesome"
-    TUNE = "tune"
+    ROBOT = ":material/robot_2:"
+    THINKING = ":material/psychology:"
+    SPARKLES = ":material/auto_awesome:"
+    TUNE = ":material/tune:"
     
     # Status
-    SUCCESS = "check_circle"
-    WARNING = "warning"
-    ERROR = "error"
-    INFO = "info"
-    HEARTBEAT = "monitor_heart"
-    BUG = "bug_report"
+    SUCCESS = ":material/check_circle:"
+    WARNING = ":material/warning:"
+    ERROR = ":material/error:"
+    INFO = ":material/info:"
+    HEARTBEAT = ":material/monitor_heart:"
+    BUG = ":material/bug_report:"
     
     # Data & Metrics
-    TREND_UP = "trending_up"
-    TREND_DOWN = "trending_down"
-    FORUM = "forum"
-    STAR = "star"
+    TREND_UP = ":material/trending_up:"
+    TREND_DOWN = ":material/trending_down:"
+    FORUM = ":material/forum:"
+    STAR = ":material/star:"
     
     # Travel
-    LOCATION = "location_on"
-    CALENDAR = "calendar_month"
-    FLIGHT = "flight_land"
+    LOCATION = ":material/location_on:"
+    CALENDAR = ":material/calendar_month:"
+    FLIGHT = ":material/flight_land:"
     
     # Actions
-    DOWNLOAD = "download"
-    SEND = "send"
+    DOWNLOAD = ":material/download:"
+    SEND = ":material/send:"

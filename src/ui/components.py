@@ -1,11 +1,12 @@
 import streamlit as st
+import textwrap
 
 def render_page_header(title: str, subtitle: str, icon: str = None, status_badge: str = None):
     """Universal page header."""
-    icon_html = f"<span class='material-symbols-outlined' style='font-size: 32px; color: var(--color-accent-primary);'>{icon}</span>" if icon else ""
-    status_html = f"<span class='badge badge-success' style='margin-bottom: var(--space-2);'>{status_badge}</span>" if status_badge else ""
+    icon_html = f"<span class='material-symbols-outlined' style='font-size: 32px; color: var(--color-accent-primary);'>{icon.replace(':material/', '').replace(':', '')}</span>" if icon else ""
+    status_html = f"<span class='badge badge-success' style='margin-bottom: var(--space-2); display: inline-block;'>{status_badge}</span>" if status_badge else ""
     
-    st.markdown(f"""
+    html = f"""
     <div style="padding: var(--space-6) 0; margin-bottom: var(--space-4);">
         {status_html}
         <div style="display: flex; align-items: center; gap: var(--space-2);">
@@ -14,11 +15,12 @@ def render_page_header(title: str, subtitle: str, icon: str = None, status_badge
         </div>
         <p class="type-body" style="max-width: 600px; margin-top: var(--space-2);">{subtitle}</p>
     </div>
-    """, unsafe_allow_html=True)
+    """
+    st.html(textwrap.dedent(html))
 
 def render_user_profile(name: str = "Modern AI Professional", role: str = "Pro Account", image_url: str = "https://lh3.googleusercontent.com/aida-public/AB6AXuDZvYxtOPSuoT8fq8jXUBiiXhZ-X9rqmlf4QguRuexgAIiXj3LzBAR5_5jejlXJFZ1MBujzaLbhBn9-cwjpNHAUS2-Z0qrUYV1iewStCRo58GW53xY2tVTeJcc4CepJxF2MPukPLmdB_SPFJhAYyiKMbCH2W4fQU2hzi8Co6VmuPizGxQ-B0hsJKQNvz-i7xzQrsoeiAklxqbIGbA7tfej0XD7vSfN6ko_ZYLbno-15lnRUk1-VkSOGIg"):
     """Sidebar user profile widget."""
-    st.markdown(f"""
+    html = f"""
     <div style="display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-6);">
         <img src="{image_url}" alt="Profile" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid var(--color-border-default);" />
         <div>
@@ -26,12 +28,15 @@ def render_user_profile(name: str = "Modern AI Professional", role: str = "Pro A
             <div class="type-caption" style="color: var(--color-text-secondary); margin: 0; text-transform: none;">{role}</div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """
+    st.html(textwrap.dedent(html))
 
 def render_metric(label: str, value: str, icon: str, trend: str = None, trend_positive: bool = True):
     """Analytics metric card mimicking Tailwind grid layout."""
     trend_color = "var(--color-status-success)" if trend_positive else "var(--color-status-error)"
     trend_icon = "trending_up" if trend_positive else "trending_down"
+    
+    clean_icon = icon.replace(":material/", "").replace(":", "")
     
     trend_html = f"""
     <div style="display: flex; align-items: center; gap: var(--space-1); color: {trend_color}; margin-top: auto; padding-top: var(--space-2); border-top: 1px solid var(--color-border-hover);">
@@ -40,22 +45,21 @@ def render_metric(label: str, value: str, icon: str, trend: str = None, trend_po
     </div>
     """ if trend else ""
 
-    st.markdown(f"""
+    html = f"""
     <div class="surface" style="padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2); height: 100%;">
         <div style="display: flex; align-items: center; justify-content: space-between; color: var(--color-text-secondary);">
             <span class="type-caption">{label}</span>
-            <span class="material-symbols-outlined" style="font-size: 18px;">{icon}</span>
+            <span class="material-symbols-outlined" style="font-size: 18px;">{clean_icon}</span>
         </div>
         <div class="type-display" style="font-size: 32px; color: var(--color-text-primary); line-height: 1; margin-top: var(--space-1);">{value}</div>
         {trend_html}
     </div>
-    """, unsafe_allow_html=True)
+    """
+    st.html(textwrap.dedent(html))
 
 def render_badge(label: str, variant: str = "info"):
     """Semantic status badge."""
-    st.markdown(f"""
-    <span class="badge badge-{variant}">{label}</span>
-    """, unsafe_allow_html=True)
+    st.html(f"<span class='badge badge-{variant}'>{label}</span>")
 
 def render_ai_card(title: str, content: str, variant: str = "suggestion"):
     """
@@ -84,9 +88,9 @@ def render_ai_card(title: str, content: str, variant: str = "suggestion"):
     color = color_map.get(variant, "var(--color-accent-primary)")
     
     cursor_class = "blinking-cursor" if variant == "thinking" else ""
-    badge_html = f"<span class='badge badge-info' style='margin-left: var(--space-2); transform: scale(0.85);'>AI Suggested</span>" if variant == "suggestion" else ""
+    badge_html = f"<span class='badge badge-info' style='margin-left: var(--space-2); transform: scale(0.85); display: inline-block;'>AI Suggested</span>" if variant == "suggestion" else ""
     
-    st.markdown(f"""
+    html = f"""
     <div class="surface" style="padding: var(--space-4); margin-bottom: var(--space-4); border-color: {color}40; background-color: var(--color-bg-surface-low);">
         <div style="display: flex; gap: var(--space-4);">
             <div style="color: {color}; margin-top: 2px;">
@@ -98,24 +102,28 @@ def render_ai_card(title: str, content: str, variant: str = "suggestion"):
             </div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """
+    st.html(textwrap.dedent(html))
 
 def render_empty_state(title: str, description: str, icon: str = "folder_open"):
     """Renders a dead-end UI state."""
-    st.markdown(f"""
+    clean_icon = icon.replace(":material/", "").replace(":", "")
+    html = f"""
     <div style="text-align: center; padding: var(--space-10); border: 1px dashed var(--color-border-default); border-radius: var(--radius-lg);">
-        <span class="material-symbols-outlined" style="font-size: 48px; color: var(--color-text-muted); margin-bottom: var(--space-4);">{icon}</span>
+        <span class="material-symbols-outlined" style="font-size: 48px; color: var(--color-text-muted); margin-bottom: var(--space-4);">{clean_icon}</span>
         <h3 class="type-title" style="margin-bottom: var(--space-2);">{title}</h3>
         <p class="type-body">{description}</p>
     </div>
-    """, unsafe_allow_html=True)
+    """
+    st.html(textwrap.dedent(html))
 
 def render_card(title: str, content: str, interactive: bool = False):
     """Renders a structural Surface primitive."""
     surface_class = "surface surface-interactive" if interactive else "surface"
-    st.markdown(f"""
+    html = f"""
     <div class="{surface_class}" style="padding: var(--space-4); margin-bottom: var(--space-4);">
         <h4 class="type-title" style="margin-bottom: var(--space-2);">{title}</h4>
         <p class="type-body" style="margin-bottom: 0; white-space: pre-wrap;">{content}</p>
     </div>
-    """, unsafe_allow_html=True)
+    """
+    st.html(textwrap.dedent(html))
