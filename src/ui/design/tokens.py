@@ -1,8 +1,7 @@
 """
 Primitive Design Tokens.
-These are the foundational values. They have no semantic meaning.
+Extracted from the Tailwind design language specification.
 """
-
 from typing import Dict
 
 # 8-pt spacing system
@@ -25,40 +24,41 @@ spacing: Dict[str, str] = {
 # Border radii
 radius: Dict[str, str] = {
     "none": "0px",
-    "sm": "4px",
-    "md": "8px",
-    "lg": "12px",
-    "xl": "16px",
+    "sm": "0.125rem",
+    "md": "0.25rem",
+    "lg": "0.5rem",
+    "xl": "0.75rem",
     "full": "9999px",
 }
 
-# Primitive Grays (Deep Charcoal Scale)
-gray: Dict[str, str] = {
-    "50": "#F9FAFB",
-    "100": "#F3F4F6",
-    "200": "#E5E7EB",
-    "300": "#D1D5DB",
-    "400": "#9CA3AF",
-    "500": "#6B7280",
-    "600": "#4B5563",
-    "700": "#374151",
-    "800": "#1F2937",
-    "900": "#111827",
-    "950": "#0B0F14",
+# Primitive Space Blue Scale
+space_blue: Dict[str, str] = {
+    "100": "#dae2fd",
+    "200": "#bac9cd",
+    "300": "#859397",
+    "400": "#3b494c",
+    "500": "#2d3449",
+    "600": "#222a3d",
+    "700": "#171f33",
+    "800": "#131b2e",
+    "900": "#0b1326",
+    "950": "#060e20",
 }
 
-# Primitive Indigo (Primary Accent)
-indigo: Dict[str, str] = {
-    "50": "#EEF2FF",
-    "100": "#E0E7FF",
-    "500": "#6366F1",
-    "600": "#4F46E5",
-    "700": "#4338CA",
-    "900": "#312E81",
+# Primitive Cyan Scale
+cyan: Dict[str, str] = {
+    "200": "#baf2ff",
+    "300": "#a5eeff",
+    "400": "#00e0ff",
+    "500": "#00daf8",
+    "600": "#006877",
+    "700": "#005f6d",
+    "800": "#004e5a",
+    "900": "#00363f",
 }
 
-# Primitive System Colors (Success, Warning, Error, Info)
+# Primitive System Colors
 green: Dict[str, str] = {"500": "#10B981"}
 amber: Dict[str, str] = {"500": "#F59E0B"}
-red: Dict[str, str] = {"500": "#EF4444"}
-blue: Dict[str, str] = {"500": "#3B82F6"}
+red: Dict[str, str] = {"500": "#ffb4ab"}
+blue: Dict[str, str] = {"500": "#bcc7de"}

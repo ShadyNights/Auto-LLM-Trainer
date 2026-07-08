@@ -53,6 +53,9 @@ def get_global_css() -> str:
     /* =========================================================================
        2. TYPOGRAPHY (5-Level System)
        ========================================================================= */
+       
+    @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+    
     .stApp {{
         background-color: var(--color-bg-base);
         color: var(--color-text-primary);
@@ -62,12 +65,14 @@ def get_global_css() -> str:
     
     /* Apply Typography Levels */
     .type-display {{
+        font-family: {typography.levels['display']['font-family']};
         font-size: {typography.levels['display']['font-size']};
         font-weight: {typography.levels['display']['font-weight']};
         line-height: {typography.levels['display']['line-height']};
         letter-spacing: {typography.levels['display']['letter-spacing']};
     }}
     h1, .type-heading {{
+        font-family: {typography.levels['heading']['font-family']};
         font-size: {typography.levels['heading']['font-size']};
         font-weight: {typography.levels['heading']['font-weight']};
         line-height: {typography.levels['heading']['line-height']};
@@ -75,18 +80,21 @@ def get_global_css() -> str:
         color: var(--color-text-primary);
     }}
     h2, h3, .type-title {{
+        font-family: {typography.levels['title']['font-family']};
         font-size: {typography.levels['title']['font-size']};
         font-weight: {typography.levels['title']['font-weight']};
         line-height: {typography.levels['title']['line-height']};
         color: var(--color-text-primary);
     }}
     p, .type-body {{
+        font-family: {typography.levels['body']['font-family']};
         font-size: {typography.levels['body']['font-size']};
         font-weight: {typography.levels['body']['font-weight']};
         line-height: {typography.levels['body']['line-height']};
         color: var(--color-text-secondary);
     }}
     small, .type-caption {{
+        font-family: {typography.levels['caption']['font-family']};
         font-size: {typography.levels['caption']['font-size']};
         font-weight: {typography.levels['caption']['font-weight']};
         text-transform: {typography.levels['caption']['text-transform']};

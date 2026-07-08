@@ -1,78 +1,111 @@
 import streamlit as st
 
-def render_hero(title: str, subtitle: str, icon: str = "✈️"):
-    """Renders a simple, professional page header."""
+def render_page_header(title: str, subtitle: str, icon: str = None, status_badge: str = None):
+    """Universal page header."""
+    icon_html = f"<span class='material-symbols-outlined' style='font-size: 32px; color: var(--color-accent-primary);'>{icon}</span>" if icon else ""
+    status_html = f"<span class='badge badge-success' style='margin-bottom: var(--space-2);'>{status_badge}</span>" if status_badge else ""
+    
     st.markdown(f"""
     <div style="padding: var(--space-6) 0; margin-bottom: var(--space-4);">
-        <h1 class="type-display">{icon} {title}</h1>
-        <p class="type-body" style="max-width: 600px;">{subtitle}</p>
+        {status_html}
+        <div style="display: flex; align-items: center; gap: var(--space-2);">
+            {icon_html}
+            <h1 class="type-display" style="margin: 0;">{title}</h1>
+        </div>
+        <p class="type-body" style="max-width: 600px; margin-top: var(--space-2);">{subtitle}</p>
     </div>
     """, unsafe_allow_html=True)
 
-def render_page_section(title: str, subtitle: str = None, icon: str = None):
-    """Renders a consistent section header."""
-    icon_html = f"<span style='margin-right: var(--space-2);'>{icon}</span>" if icon else ""
-    subtitle_html = f"<p class='type-caption' style='margin-top: var(--space-1);'>{subtitle}</p>" if subtitle else ""
+def render_user_profile(name: str = "Modern AI Professional", role: str = "Pro Account", image_url: str = "https://lh3.googleusercontent.com/aida-public/AB6AXuDZvYxtOPSuoT8fq8jXUBiiXhZ-X9rqmlf4QguRuexgAIiXj3LzBAR5_5jejlXJFZ1MBujzaLbhBn9-cwjpNHAUS2-Z0qrUYV1iewStCRo58GW53xY2tVTeJcc4CepJxF2MPukPLmdB_SPFJhAYyiKMbCH2W4fQU2hzi8Co6VmuPizGxQ-B0hsJKQNvz-i7xzQrsoeiAklxqbIGbA7tfej0XD7vSfN6ko_ZYLbno-15lnRUk1-VkSOGIg"):
+    """Sidebar user profile widget."""
+    st.markdown(f"""
+    <div style="display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-6);">
+        <img src="{image_url}" alt="Profile" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid var(--color-border-default);" />
+        <div>
+            <div class="type-body" style="font-weight: 600; color: var(--color-text-primary); margin: 0; line-height: 1.2;">{name}</div>
+            <div class="type-caption" style="color: var(--color-text-secondary); margin: 0; text-transform: none;">{role}</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+def render_metric(label: str, value: str, icon: str, trend: str = None, trend_positive: bool = True):
+    """Analytics metric card mimicking Tailwind grid layout."""
+    trend_color = "var(--color-status-success)" if trend_positive else "var(--color-status-error)"
+    trend_icon = "trending_up" if trend_positive else "trending_down"
     
-    st.markdown(f"""
-    <div style="margin-bottom: var(--space-4);">
-        <h3 class="type-title" style="margin-bottom: 0;">{icon_html}{title}</h3>
-        {subtitle_html}
+    trend_html = f"""
+    <div style="display: flex; align-items: center; gap: var(--space-1); color: {trend_color}; margin-top: auto; padding-top: var(--space-2); border-top: 1px solid var(--color-border-hover);">
+        <span class="material-symbols-outlined" style="font-size: 14px;">{trend_icon}</span>
+        <span class="type-caption" style="text-transform: none;">{trend}</span>
     </div>
-    """, unsafe_allow_html=True)
+    """ if trend else ""
 
-def render_metric(label: str, value: str, delta: str = None, is_positive: bool = True):
-    """Renders an atomic number representation."""
-    delta_color = "var(--color-status-success)" if is_positive else "var(--color-status-error)"
-    delta_html = f"<div class='type-caption' style='color: {delta_color};'>{delta}</div>" if delta else ""
-    
     st.markdown(f"""
-    <div style="display: flex; flex-direction: column; gap: var(--space-2);">
-        <div class="type-caption">{label}</div>
-        <div class="type-heading">{value}</div>
-        {delta_html}
-    </div>
-    """, unsafe_allow_html=True)
-
-def render_card(title: str, content: str, interactive: bool = False):
-    """Renders a structural Surface primitive."""
-    surface_class = "surface surface-interactive" if interactive else "surface"
-    st.markdown(f"""
-    <div class="{surface_class}" style="padding: var(--space-4); margin-bottom: var(--space-4);">
-        <h4 class="type-title" style="margin-bottom: var(--space-2);">{title}</h4>
-        <p class="type-body" style="margin-bottom: 0;">{content}</p>
+    <div class="surface" style="padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2); height: 100%;">
+        <div style="display: flex; align-items: center; justify-content: space-between; color: var(--color-text-secondary);">
+            <span class="type-caption">{label}</span>
+            <span class="material-symbols-outlined" style="font-size: 18px;">{icon}</span>
+        </div>
+        <div class="type-display" style="font-size: 32px; color: var(--color-text-primary); line-height: 1; margin-top: var(--space-1);">{value}</div>
+        {trend_html}
     </div>
     """, unsafe_allow_html=True)
 
 def render_badge(label: str, variant: str = "info"):
-    """
-    Renders a semantic status badge.
-    Variants: success, warning, error, info
-    """
+    """Semantic status badge."""
     st.markdown(f"""
     <span class="badge badge-{variant}">{label}</span>
     """, unsafe_allow_html=True)
 
-def render_empty_state(title: str, description: str, icon: str = "📂"):
-    """Renders a dead-end UI state. Must be followed by a Streamlit button CTA in the app script."""
+def render_ai_card(title: str, content: str, variant: str = "suggestion"):
+    """
+    Renders an AI interaction card.
+    Variants: suggestion, thinking, warning, reasoning, citation, completion
+    """
+    icon_map = {
+        "suggestion": "auto_awesome",
+        "thinking": "psychology",
+        "warning": "warning",
+        "reasoning": "account_tree",
+        "citation": "format_quote",
+        "completion": "check_circle"
+    }
+    
+    color_map = {
+        "suggestion": "var(--color-accent-primary)",
+        "thinking": "var(--color-text-muted)",
+        "warning": "var(--color-status-warning)",
+        "reasoning": "var(--color-status-info)",
+        "citation": "var(--color-text-secondary)",
+        "completion": "var(--color-status-success)"
+    }
+    
+    icon = icon_map.get(variant, "info")
+    color = color_map.get(variant, "var(--color-accent-primary)")
+    
+    cursor_class = "blinking-cursor" if variant == "thinking" else ""
+    badge_html = f"<span class='badge badge-info' style='margin-left: var(--space-2); transform: scale(0.85);'>AI Suggested</span>" if variant == "suggestion" else ""
+    
     st.markdown(f"""
-    <div style="text-align: center; padding: var(--space-10); border: 1px dashed var(--color-border-default); border-radius: var(--radius-lg);">
-        <div class="type-display" style="margin-bottom: var(--space-4); color: var(--color-text-muted);">{icon}</div>
-        <h3 class="type-title" style="margin-bottom: var(--space-2);">{title}</h3>
-        <p class="type-body">{description}</p>
+    <div class="surface" style="padding: var(--space-4); margin-bottom: var(--space-4); border-color: {color}40; background-color: var(--color-bg-surface-low);">
+        <div style="display: flex; gap: var(--space-4);">
+            <div style="color: {color}; margin-top: 2px;">
+                <span class="material-symbols-outlined">{icon}</span>
+            </div>
+            <div>
+                <div class="type-title" style="display: flex; align-items: center; margin-bottom: var(--space-2);">{title}{badge_html}</div>
+                <div class="type-body {cursor_class}" style="color: var(--color-text-secondary); margin: 0;">{content}</div>
+            </div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
-def render_ai_message(message: str, is_user: bool = False):
-    """Renders an AI interaction system node (Prompt or Response)."""
-    bg_color = "var(--color-bg-surface-raised)" if is_user else "transparent"
-    align = "right" if is_user else "left"
-    margin = "margin-left: auto;" if is_user else "margin-right: auto;"
-    
+def render_empty_state(title: str, description: str, icon: str = "folder_open"):
+    """Renders a dead-end UI state."""
     st.markdown(f"""
-    <div style="display: flex; flex-direction: column; text-align: {align}; margin-bottom: var(--space-4);">
-        <div style="background-color: {bg_color}; padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); max-width: 80%; {margin}">
-            <p class="type-body" style="margin-bottom: 0;">{message}</p>
-        </div>
+    <div style="text-align: center; padding: var(--space-10); border: 1px dashed var(--color-border-default); border-radius: var(--radius-lg);">
+        <span class="material-symbols-outlined" style="font-size: 48px; color: var(--color-text-muted); margin-bottom: var(--space-4);">{icon}</span>
+        <h3 class="type-title" style="margin-bottom: var(--space-2);">{title}</h3>
+        <p class="type-body">{description}</p>
     </div>
     """, unsafe_allow_html=True)
