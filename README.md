@@ -1,6 +1,6 @@
 # Traveler LLM
 
-Traveler LLM is a production-grade AI Travel Planner powered by a **Continuous Feedback Learning Pipeline**. 
+Traveler LLM is a production-grade AI Travel Planner powered by a **Continuous Feedback Learning Pipeline**.   
 
 Unlike simple wrapper applications, Traveler LLM features an event-driven architecture that automatically captures user feedback, evaluates generated itineraries, and queues high-quality interactions to evolve its dataset and inference configurations.
 
