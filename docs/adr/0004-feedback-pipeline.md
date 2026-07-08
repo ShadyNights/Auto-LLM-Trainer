@@ -1,15 +1,27 @@
 # ADR 0004: Continuous Feedback Learning Pipeline
 
 ## Context
-The original system claimed to be a "Self-Training LLM System", which technically implied automatic weight updates (Fine-tuning, LoRA). In reality, it built datasets from feedback and promoted inference configurations (prompts).
+The platform's original premise marketed a "Self-Training LLM System." This misleadingly implied active, automated neural network weight updates (Fine-tuning, LoRA) occurring in real-time. In reality, the system merely aggregated user feedback, curated datasets, and promoted distinct inference configurations via prompts.
 
 ## Decision
-We formalized this as the **Continuous Feedback Learning Pipeline**. It is implemented via a strict orchestration interface (`LearningPipeline`) divided into independent stages (`Collect`, `Dataset`, `Evaluate`, `Promote`, `Cleanup`).
+**Formalize the architecture as the "Continuous Feedback Learning Pipeline."**
+We established a strict, modular orchestration interface (`LearningPipeline`) that divides the process into independent, asynchronous stages: 
+1. **Collect** (Gathering pending feedback)
+2. **Dataset** (Building curated training subsets)
+3. **Evaluate** (Benchmarking configuration performance)
+4. **Promote** (Updating the active `model_versions` registry)
+5. **Cleanup** (Resolving task queues)
 
 ## Alternatives Considered
-- **Actual LoRA/SFT Integration**: Rejected for the current scope.
-- **Monolithic Training Script**: Rejected because it prevented independent scaling or testing of the evaluation vs dataset building phases.
+- **Real-time LoRA / SFT Integration**: *Rejected* for the current MVP scope due to the immense infrastructure complexity and cost of automated hardware fine-tuning.
+- **Monolithic Training Script**: *Rejected* because a single massive script prevents independent staging, isolated testing, and precise failure recovery.
 
 ## Consequences
-- **Positive**: Honest terminology. The pipeline stages are independently testable and idempotent. The interface is ready for a future `TrainerStage` without architectural changes.
-- **Negative**: None. Provides a cleaner, scalable operational model.
+> [!TIP] 
+> **Positive Outcomes**
+> - **Honest Architecture**: Terminology now accurately reflects the system's capabilities.
+> - **Scalability**: Because stages are modular and idempotent, we can easily inject an actual `TrainerStage` (for API-based fine-tuning) in the future without altering the pipeline architecture.
+
+> [!WARNING]
+> **Negative Outcomes**
+> - None. This decision provides a definitively cleaner and more scalable operational model.

@@ -1,18 +1,24 @@
-# ADR 0007: Database Schema Unification and Trigger Removal
+# ADR 0007: Database Schema Unification
 
 ## Context
-Historically, the PostgreSQL database was built via fragmented initialization scripts (`001_baseline.sql`, `002_architecture_overhaul.sql`, and various manual hotfixes like `fix_triggers.sql`). Additionally, the original architecture relied heavily on PostgreSQL triggers to orchestrate complex domain workflows—such as automatically copying data to a `training_data` table when a rating crossed a certain threshold. This tight coupling between data storage and business logic caused opaque failures, silent errors, and made local testing incredibly difficult.
+Historically, the PostgreSQL database was assembled via heavily fragmented initialization scripts and manual hotfixes. Worse, the architecture heavily abused PostgreSQL triggers to orchestrate complex domain workflows—such as automatically copying data to training tables based on rating thresholds. This tight coupling between data storage and business logic caused opaque failures, silent errors, and made local testing nearly impossible.
 
 ## Decision
-We decided to completely unify the database initialization into a single, cohesive schema (`migrations/001_initial_schema.sql`) and strictly enforce that the database acts **only** as a source of truth for state.
-1. **Unification**: All fragmented hotfixes and outdated schemas were permanently deleted.
-2. **Trigger Eradication**: All orchestrating database triggers were removed. Business logic and training workflow execution were shifted entirely to the application layer (specifically, the `training_queue` processed by `background_jobs.py`).
-3. **Pure Helper Functions**: We introduced pure, side-effect-free SQL functions (like `calculate_quality_score()` and `extract_training_sample()`) to assist the background workers with data formatting, without triggering automated state changes.
+**Unify the schema and strictly eradicate business logic triggers.**
+We collapsed the entire database initialization into a single, cohesive schema (`migrations/001_initial_schema.sql`). 
+1. **Trigger Eradication**: All orchestrating database triggers were permanently deleted. Workflow execution was shifted entirely to the application layer (specifically via the `training_queue` and `background_jobs.py`).
+2. **Pure Helper Functions**: We introduced pure, side-effect-free SQL functions (`calculate_quality_score()`, `extract_training_sample()`) to handle data formatting for the background workers *without* triggering automated state changes.
 
 ## Alternatives Considered
-- **Maintaining Incremental Migrations (Flyway/Alembic)**: Rejected at this stage. Given that the prototype was being overhauled into a production baseline, maintaining the messy history of the prototype was unnecessary overhead. A clean `001_initial_schema.sql` establishes a much stronger, documented V1 starting point.
-- **Keeping Triggers for "Real-time" ML**: Rejected because database triggers are notoriously difficult to monitor, debug, and scale. Orchestration belongs in the application layer.
+- **Incremental Migration Systems (Flyway/Alembic)**: *Rejected* at this specific milestone. Because we were overhauling a fragmented prototype into a clean production baseline, maintaining the messy history of the prototype was unnecessary overhead.
+- **Retaining "Real-time" Database Triggers**: *Rejected* because database triggers are notoriously difficult to monitor, debug, scale, and version control. 
 
 ## Consequences
-- **Positive**: The deployment footprint is simplified to a single initialization file. Eradicating triggers means that when an itinerary is generated or rated, the database merely records it, avoiding silent cascade failures. The architecture is now highly predictable and testable.
-- **Negative**: The application layer must now explicitly manage the asynchronous queuing of training events (e.g., manually calling `training_repo.enqueue(itin_id)`). This adds slightly more boilerplate to the Python services but drastically improves system observability.
+> [!TIP] 
+> **Positive Outcomes**
+> - **Deployment Simplicity**: The entire platform database spins up from a single initialization script.
+> - **Predictability**: Eradicating triggers means the database acts strictly as a passive ledger. When an event occurs, it is recorded without causing unpredictable, cascading background mutations.
+
+> [!WARNING]
+> **Negative Outcomes**
+> - **Application Overhead**: The application layer must now explicitly manage the asynchronous queuing of training events (e.g., executing `training_repo.enqueue()`). This adds slight boilerplate but drastically improves system observability.

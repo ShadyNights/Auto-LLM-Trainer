@@ -1,35 +1,52 @@
 # Operations & Recovery Guide
 
-## Logging & Monitoring
-All application logs are emitted as structured JSON to `stdout`.
-Key fields to index in your log aggregator (e.g., Datadog, ELK):
-- `correlation_id`: Trace a request from prompt submission through generation and feedback.
-- `conversation_id`: Track a single user's session.
-- `component`: Identify if the log originated in `PlannerService`, `GroqProvider`, or `LearningPipeline`.
+> [!NOTE]
+> Standardized operational procedures for monitoring platform health, rotating credentials, and managing system queues.
 
-## Dead Letter Queue (DLQ) Handling
-The `training_queue` automatically transitions tasks to `status = 'dead'` after the maximum retry threshold is reached.
-**Recovery Runbook**:
-1. Query the database for dead tasks:
+---
+
+## 1. Telemetry & Observability
+
+All operational logs are emitted strictly as structured JSON to `stdout`, optimizing them for ingestion by platforms like Datadog, ELK, or Splunk.
+
+**Critical Indexing Fields:**
+- `correlation_id`: The primary key for tracing a single request horizontally from user input ➔ LLM inference ➔ feedback submission.
+- `conversation_id`: Tracks the vertical lifecycle of a distinct user session.
+- `component`: Identifies the exact origin module (e.g., `PlannerService`, `LearningPipeline`, `GroqProvider`).
+
+## 2. Queue Management & DLQ Recovery
+
+The `training_queue` automatically offloads processing overhead from the UI. If a task fails repeatedly (e.g., due to network timeouts), it transitions to a **Dead Letter Queue (DLQ)** by setting its status to `dead`.
+
+**Recovery Runbook:**
+1. **Identify**: Query the DLQ.
    ```sql
-   SELECT * FROM training_queue WHERE status = 'dead';
+   SELECT id, error_message, retry_count FROM training_queue WHERE status = 'dead';
    ```
-2. Check the associated `error_message` and structured logs.
-3. If the error was transient (e.g., API downtime), manually update the status back to `pending` and reset `retry_count`.
+2. **Investigate**: Cross-reference the `error_message` with your JSON log aggregator.
+3. **Resolve**: If the failure was transient (e.g., an LLM provider outage), manually revive the task.
+   ```sql
+   UPDATE training_queue SET status = 'pending', retry_count = 0 WHERE status = 'dead';
+   ```
 
-## Secret Rotation (Provider Keys)
-To rotate the `GROQ_API_KEY`:
-1. Generate a new key in the Groq console.
-2. Update the `.env` file (or your secrets manager).
-3. Restart the Streamlit application to reload the environment.
-*(Note: Active queue tasks do not require the API key unless the pipeline stage requires inference).*
+## 3. Security & Access Control
 
-## Least-Privilege PostgreSQL User
-Do not run the application as the `postgres` superuser.
+### Least-Privilege Database User
+The application must **never** run under the `postgres` superuser in production. Enforce a least-privilege security model.
+
 ```sql
+-- Execute as Superuser
 CREATE USER traveler_app_user WITH PASSWORD 'secure_password';
 GRANT CONNECT ON DATABASE traveler_db TO traveler_app_user;
 GRANT USAGE ON SCHEMA public TO traveler_app_user;
-GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA public TO traveler_app_user;
+
+-- Grant strict DML access
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO traveler_app_user;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO traveler_app_user;
 ```
+
+### Credential Rotation
+To rotate external provider keys (e.g., Groq):
+1. Generate the new key via the provider's administration console.
+2. Update the `.env` file or your encrypted secrets manager.
+3. Restart the application process to instantiate the new connection pool. Background tasks currently in the queue will simply utilize the new key upon their next execution cycle.

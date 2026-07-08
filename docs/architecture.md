@@ -1,31 +1,44 @@
 # System Architecture
 
-## Overview
-Traveler LLM is a production-grade AI Travel Planner powered by a **Continuous Feedback Learning Pipeline**. It leverages PostgreSQL as a single source of truth for all operational data, state, events, and background task queues.
+> [!NOTE]
+> **Traveler LLM** is a production-grade, Domain-Driven AI platform. It features a strict architectural hierarchy designed for scalability, observability, and autonomous learning via our Continuous Feedback Pipeline.
 
-## Core Layers
-The architecture adheres to strict dependency rules (`UI -> Services -> Providers/Repositories -> Infrastructure`).
+---
+
+## Architecture Overview
+
+The system strictly adheres to the dependency rule: dependencies point inward. The frontend knows about the services, the services know about the domain and abstractions, and the infrastructure fulfills those abstractions.
+
+```mermaid
+flowchart TD
+    A[UI Layer - Streamlit] --> B[Services Layer]
+    B --> C[Domain Models & DTOs]
+    B --> D[Provider & Repository Abstractions]
+    D --> E[Infrastructure Layer - PostgreSQL / Groq]
+```
 
 ### 1. UI Layer (Streamlit)
-Located in `app.py` (and potentially `src/ui/`), this layer manages user interactions, renders dashboards, and performs startup health checks (Database, Config, Provider Keys, Prompt Checksums).
+- **Role**: Presentation and layout orchestration.
+- **Components**: Driven by `app.py`. Styling is strictly decoupled using centralized HTML/CSS injection via `src/ui/styles.py` to achieve an enterprise SaaS aesthetic without heavy Javascript frameworks.
+- **Responsibilities**: User input capture, session state management, and real-time environment health checks.
 
 ### 2. Services Layer
-Encapsulates all business logic:
-- **PlannerService**: Orchestrates itinerary generation by fetching prompts via `PromptRepository` and calling the `ProviderInterface`.
-- **EventService**: Standardizes and logs user interactions as strictly-typed events linked to a `conversation_id`.
+- **Role**: Core business logic and use-case orchestration.
+- **Components**: 
+  - `PlannerService`: Manages prompt assembly and LLM inference.
+  - `EventService`: Manages telemetry, user interactions, and feedback capture.
+- **Responsibilities**: Validating inputs, invoking infrastructure abstractions, and enforcing business rules.
 
-### 3. Pipeline Layer
-The `LearningPipeline` is divided into independent stages:
-- **Collect**: Gathers pending feedback tasks.
-- **Dataset**: Builds new dataset iterations.
-- **Evaluate**: Performs structural and semantic validation on outputs.
-- **Promote**: Updates the `model_versions` registry.
-- **Cleanup**: Archives old data and resolves queue tasks.
+### 3. Abstraction Layer (Repositories & Providers)
+- **Role**: Decoupling business logic from external dependencies.
+- **Components**: 
+  - `ProviderInterface`: Exposes a unified `generate()` contract. Implemented by `GroqProvider`.
+  - `Repositories`: Standardized data access (e.g., `PromptRepository`, `ItineraryRepository`).
+- **Responsibilities**: Providing seamless swappability for LLM providers or databases without refactoring core services.
 
-### 4. Provider Abstraction
-The `ProviderInterface` exposes a single `generate(request)` method. `GroqProvider` implements this to interact with LLaMA models, tracking latency, token usage, and cost estimates independently of the business logic.
-
-### 5. Infrastructure Layer
-- **PostgreSQL**: Stores all relational data.
-- **DatabaseConnection**: A singleton context manager to handle psycopg2 cursors and transactions safely.
-- **JSON Logger**: Emits structured logs containing operational metadata (correlation ID, conversation ID, duration).
+### 4. Infrastructure & Pipeline Layer
+- **Role**: Persistence, execution, and continuous learning.
+- **Components**: 
+  - **PostgreSQL**: The absolute single source of truth for all system state.
+  - **Learning Pipeline**: Background workers that asynchronously process user feedback (`training_queue`) to refine prompts and evaluate model performance.
+- **Responsibilities**: Data integrity (ACID), background orchestration, and secure external network execution.

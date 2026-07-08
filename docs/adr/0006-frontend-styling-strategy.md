@@ -1,19 +1,26 @@
-# ADR 0006: Native Streamlit Styling Strategy (Frontend Redesign)
+# ADR 0006: Native Streamlit Styling Strategy
 
 ## Context
-The application required a major UI/UX overhaul to achieve a premium, production-grade SaaS aesthetic (dark themes, refined spacing, professional hover states, metrics cards). Streamlit's default styling is notoriously rigid and difficult to customize, which often leads teams to abandon Streamlit for full frontend rewrites (React/Vue) or resort to messy, scattered inline CSS and JavaScript hacks.
+The platform required a comprehensive UI/UX overhaul to achieve a premium, production-grade SaaS aesthetic featuring dark themes, refined spacing, and professional interactive states. Streamlit's default styling is highly rigid, which historically forces engineering teams to either abandon the framework entirely (for React/Vue) or pollute the codebase with fragmented, unmaintainable inline styling hacks.
 
 ## Decision
-We decided to retain Streamlit for full-stack Python simplicity, but implement a **Centralized CSS Design System** via HTML injection.
-1. `src/ui/styles.py`: Contains a singular, robust CSS block defining variables (tokens) for colors, spacing, radius, and shadows. It targets stable Streamlit selectors (`data-testid`, `.stButton`) rather than fragile auto-generated emotion classes.
-2. `src/ui/components.py`: Contains pure Python functions that return sanitized HTML blocks mapped to our custom CSS utility classes (e.g., `<div class="card card--raised">`).
-3. `app.py`: Acts strictly as a layout orchestrator without any embedded HTML or CSS logic.
+**Implement a Centralized CSS Design System via HTML Injection.**
+We elected to retain Streamlit's pure-Python deployment simplicity while completely subverting its default aesthetic through strict abstraction:
+1. **`src/ui/styles.py`**: A centralized CSS architecture defining strict design tokens (colors, spacing, shadows). We target *stable* Streamlit selectors (e.g., `[data-testid="stSidebar"]`, `.stButton`) rather than fragile auto-generated emotion classes.
+2. **`src/ui/components.py`**: Pure Python wrappers that output sanitized HTML mapped perfectly to our custom CSS utility classes.
+3. **`app.py`**: Acts exclusively as a layout orchestrator, devoid of any raw CSS or HTML logic.
 
 ## Alternatives Considered
-- **Custom Streamlit Components**: Building a Node.js/React bridge component for the UI elements. Rejected because it introduces a JavaScript build step, breaks the "pure Python" deployment simplicity, and creates unnecessary maintenance overhead.
-- **Tailwind CSS / External Frameworks**: Rejected to avoid external dependency bloat and complex build pipelines. A lightweight custom CSS file is sufficient.
-- **Scattered `st.markdown(unsafe_allow_html=True)` inline styles**: Rejected as an anti-pattern that creates duplicated technical debt and makes cohesive redesigns impossible.
+- **Custom Node.js Streamlit Components**: *Rejected*. Introducing a React/Node.js build step destroys the "pure Python" operational simplicity and drastically inflates maintenance overhead.
+- **External CSS Frameworks (Tailwind)**: *Rejected* to prevent dependency bloat and complex build pipelines.
+- **Scattered `st.markdown` Inline Styles**: *Rejected* as an egregious anti-pattern that guarantees technical debt.
 
 ## Consequences
-- **Positive**: We achieved a stunning, responsive, enterprise-grade dark UI while maintaining 100% Python orchestration. Changing the brand color or spacing grid is now a single-line change in the CSS tokens.
-- **Negative**: Relying on CSS injection in Streamlit is not officially supported by Streamlit's rendering engine. If Streamlit heavily alters their DOM hierarchy in future major versions, our CSS selectors may require updates. We mitigated this by targeting the most stable selectors available.
+> [!TIP] 
+> **Positive Outcomes**
+> - **SaaS Aesthetic**: Achieved an enterprise-grade, responsive UI while maintaining 100% Python backend orchestration.
+> - **Design Scalability**: Adjusting brand colors, spacing, or radius variables requires only a single-line change in the token file.
+
+> [!WARNING]
+> **Negative Outcomes**
+> - **Selector Fragility**: Relying on CSS injection means our styles could break if Streamlit fundamentally alters their DOM hierarchy in major version updates. We mitigated this by targeting the most stable selectors available.
