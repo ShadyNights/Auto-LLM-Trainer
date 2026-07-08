@@ -109,3 +109,13 @@ def render_empty_state(title: str, description: str, icon: str = "folder_open"):
         <p class="type-body">{description}</p>
     </div>
     """, unsafe_allow_html=True)
+
+def render_card(title: str, content: str, interactive: bool = False):
+    """Renders a structural Surface primitive."""
+    surface_class = "surface surface-interactive" if interactive else "surface"
+    st.markdown(f"""
+    <div class="{surface_class}" style="padding: var(--space-4); margin-bottom: var(--space-4);">
+        <h4 class="type-title" style="margin-bottom: var(--space-2);">{title}</h4>
+        <p class="type-body" style="margin-bottom: 0; white-space: pre-wrap;">{content}</p>
+    </div>
+    """, unsafe_allow_html=True)
