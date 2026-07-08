@@ -51,7 +51,7 @@ class SidebarLayout:
             # Operations Group
             st.markdown("<span class='type-caption'>Operations</span>", unsafe_allow_html=True)
             st.markdown(f"{Icons.SETTINGS} Configuration")
-            st.markdown(f"<span class='type-caption'>Session: {session_id[:8]}...</span>", unsafe_allow_html=True)
+            st.markdown(f"<span class='type-caption'>Session: {str(session_id)[:8]}...</span>", unsafe_allow_html=True)
             
             if warnings:
                 st.markdown("<div style='margin-top: var(--space-4);'>", unsafe_allow_html=True)
