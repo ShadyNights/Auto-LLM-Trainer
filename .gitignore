@@ -19,3 +19,8 @@ __pycache__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Python Packaging
+*.egg-info/
+build/
+dist/
