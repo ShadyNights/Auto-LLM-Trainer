@@ -17,12 +17,21 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
+# Install curl for healthcheck
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copy Python dependencies from builder
 COPY --from=builder /root/.local /root/.local
 
 # Copy application code
 COPY src/ ./src/
+COPY prompts/ ./prompts/
+COPY migrations/ ./migrations/
 COPY app.py .
+COPY background_jobs.py .
+COPY setup_database.py .
 COPY setup.py .
 
 # Create logs directory

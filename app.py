@@ -24,7 +24,7 @@ from src.services.planner.planner_service import PlannerService
 from src.services.event.event_service import EventService
 from src.domain.dto.itinerary_request import ItineraryRequest
 from src.domain.enums.event_type import EventType
-from src.domain.exceptions import ConfigurationError, PromptNotFound, ProviderUnavailable
+from src.domain.exceptions import TravelerException, ConfigurationError, PromptNotFound, ProviderUnavailable
 from src.infrastructure.logging.json_logger import get_json_logger
 
 load_dotenv(override=True)
@@ -32,7 +32,8 @@ logger = get_json_logger(__name__)
 
 st.set_page_config(page_title="AI Travel Planner Pro", page_icon="✈️", layout="wide")
 
-# ==================== BOOTSTRAP DEPENDENCIES ====================
+try:
+    # ==================== BOOTSTRAP DEPENDENCIES ====================
 db = DatabaseConnection()
 config_repo = ConfigRepository(db)
 prompt_repo = PromptRepository()
@@ -193,3 +194,11 @@ if "itinerary" in st.session_state:
         itinerary_repo.update_rating(st.session_state.itinerary_id, rating, "No comments")
         event_service.log_feedback(st.session_state.conversation_id, st.session_state.corr_id, rating, "No comments")
         st.success("Feedback recorded. The Learning Pipeline will use this to improve!")
+
+except TravelerException as te:
+    logger.error("Domain exception occurred", exc_info=True, extra={"status": "failed"})
+    st.error(f"⚠️ **Application Error:** {str(te)}")
+except Exception as e:
+    logger.error("Unhandled unexpected exception", exc_info=True, extra={"status": "failed"})
+    st.error("🚨 **System Error:** An unexpected issue occurred while processing your request. Our team has been notified.")
+
