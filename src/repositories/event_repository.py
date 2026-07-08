@@ -1,8 +1,5 @@
 from typing import Optional, Dict, Any
 from src.infrastructure.database.connection import DatabaseConnection
-from src.domain.entities.event import Event
-from src.domain.entities.conversation import Conversation
-from datetime import datetime
 
 class EventRepository:
     def __init__(self, db: DatabaseConnection):

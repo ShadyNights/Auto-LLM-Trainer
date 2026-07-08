@@ -1,7 +1,6 @@
-from typing import Optional, List, Dict, Any
+from typing import Optional
 from src.infrastructure.database.connection import DatabaseConnection
 from src.domain.entities.system_config import SystemConfig
-from datetime import datetime
 
 class ConfigRepository:
     def __init__(self, db: DatabaseConnection):
