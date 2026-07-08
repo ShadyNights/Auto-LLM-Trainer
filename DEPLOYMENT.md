@@ -45,11 +45,11 @@ Streamlit Cloud does not use `.env` files. Instead, it uses a secure secrets man
 
 ```toml
 GROQ_API_KEY = "gsk_your_production_key"
-DB_HOST = "ep-cool-cloud-1234.us-east-2.aws.neon.tech"
-DB_NAME = "traveler_db"
-DB_USER = "traveler_app_user"
-DB_PASSWORD = "production_secure_password"
-DB_PORT = "5432"
+PGHOST = "ep-cool-cloud-1234.us-east-2.aws.neon.tech"
+PGDATABASE = "traveler_db"
+PGUSER = "traveler_app_user"
+PGPASSWORD = "production_secure_password"
+PGPORT = "5432"
 ```
 
 3. Click **Save** and then click **Deploy!**
