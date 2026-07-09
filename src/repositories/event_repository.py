@@ -1,3 +1,4 @@
+import json
 from typing import Optional, Dict, Any
 from src.infrastructure.database.connection import DatabaseConnection
 
@@ -18,6 +19,6 @@ class EventRepository:
             cur.execute(
                 """INSERT INTO events (conversation_id, correlation_id, event_type, payload, actor, version) 
                    VALUES (%s, %s, %s, %s, %s, %s) RETURNING id""",
-                (conversation_id, correlation_id, event_type, payload, actor, version)
+                (conversation_id, correlation_id, event_type, json.dumps(payload), actor, version)
             )
             return cur.fetchone()['id']
