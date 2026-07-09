@@ -37,11 +37,11 @@ def bootstrap_pipeline_metadata(db: DatabaseConnection):
     queries = [
         "INSERT INTO datasets (version_name, sample_count, average_quality, source) VALUES ('ds-v1', 1500, 92.5, 'feedback') ON CONFLICT (version_name) DO NOTHING",
         "INSERT INTO prompts_metadata (version_name, checksum, is_active) VALUES ('v1', 'abc123hash', true) ON CONFLICT (version_name) DO NOTHING",
-        "INSERT INTO model_versions (version_name, provider, provider_model, prompt_version, dataset_version) VALUES ('llama-3.1-8b', 'Groq', 'llama-3.1-8b-instant', 'v1', 'ds-v1') ON CONFLICT (version_name) DO NOTHING",
+        "INSERT INTO model_versions (version_name, provider, provider_model, prompt_version, dataset_version) VALUES ('Custom Model v1', 'Custom Provider', 'custom-llm-1', 'v1', 'ds-v1') ON CONFLICT (version_name) DO NOTHING",
         "INSERT INTO system_config (id, config_version, active_model_id, active_prompt_id, active_dataset_id) VALUES (1, 'prod-1.0', 1, 1, 1) ON CONFLICT (id) DO NOTHING",
         "INSERT INTO config_evaluations (model_version_id, score, passed, structural_metrics, semantic_metrics) VALUES (1, 95.5, true, '{\"format\": 1.0}', '{\"relevance\": 0.95}')",
         "INSERT INTO audit_logs (action, details) VALUES ('SYSTEM_STARTUP', '{\"message\": \"Test data pipeline initialized\", \"actor\": \"system\"}')",
-        "INSERT INTO audit_logs (action, details) VALUES ('CONFIG_UPDATED', '{\"prompt\": \"v1\", \"model\": \"llama-3.1-8b-instant\", \"actor\": \"admin\"}')"
+        "INSERT INTO audit_logs (action, details) VALUES ('CONFIG_UPDATED', '{\"prompt\": \"v1\", \"model\": \"Custom Model v1\", \"actor\": \"admin\"}')"
     ]
     
     for q in queries:
