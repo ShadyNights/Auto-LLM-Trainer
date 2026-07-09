@@ -24,7 +24,8 @@ class MetricsRepository:
         
         try:
             with self.db.get_cursor() as cur:
-                cur.execute("SELECT COUNT(*) as cnt FROM conversations")
+                # Only count conversations that have at least one interaction (event)
+                cur.execute("SELECT COUNT(DISTINCT conversation_id) as cnt FROM events")
                 row = cur.fetchone()
                 if row: dto.total_conversations = row['cnt']
                 

@@ -111,9 +111,12 @@ try:
     # Fetch Metrics for Sidebar
     metrics_data = None
     try:
-        with db.get_cursor(commit_on_success=False) as cur:
-            cur.execute("SELECT * FROM dashboard_metrics")
-            metrics_data = cur.fetchone()
+        dto = metrics_repo.get_ai_metrics()
+        metrics_data = {
+            'total_conversations': dto.total_conversations,
+            'average_rating': dto.average_rating,
+            'generation_failures': dto.failed_generations
+        }
     except Exception:
         pass
 
