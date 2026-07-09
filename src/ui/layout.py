@@ -10,15 +10,19 @@ def get_layout_css() -> str:
         background-color: var(--c-layer-lowest) !important;
         border-right: 1px solid var(--c-outline-variant) !important;
     }
+    
+    .l-mb-md { margin-bottom: var(--space-md); }
+    .l-mb-lg { margin-bottom: var(--space-lg); }
+    .l-icon { margin-right: var(--space-sm); }
     """
 
 def render_header(title: str, subtitle: Optional[str] = None, icon: Optional[str] = None):
     """Renders a page or section header (Maps to Headline 2 or 3)."""
-    icon_html = f"<span aria-hidden='true' style='margin-right:8px;'>{icon}</span>" if icon else ""
+    icon_html = f"<span aria-hidden='true' class='l-icon'>{icon}</span>" if icon else ""
     subtitle_html = f"<p>{subtitle}</p>" if subtitle else ""
     
     st.markdown(f"""
-    <div style="margin-bottom: var(--space-lg);">
+    <div class="l-mb-lg">
         <h2>{icon_html}{title}</h2>
         {subtitle_html}
     </div>
@@ -26,6 +30,6 @@ def render_header(title: str, subtitle: Optional[str] = None, icon: Optional[str
 
 def render_section(title: str, subtitle: Optional[str] = None, icon: Optional[str] = None):
     """Renders a standardized section layout."""
-    icon_html = f"<span aria-hidden='true' style='margin-right:8px;'>{icon}</span>" if icon else ""
+    icon_html = f"<span aria-hidden='true' class='l-icon'>{icon}</span>" if icon else ""
     subtitle_html = f"<p>{subtitle}</p>" if subtitle else ""
-    st.markdown(f"<div style='margin-bottom: var(--space-md);'><h3>{icon_html}{title}</h3>{subtitle_html}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='l-mb-md'><h3>{icon_html}{title}</h3>{subtitle_html}</div>", unsafe_allow_html=True)

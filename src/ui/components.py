@@ -22,17 +22,32 @@ def get_components_css() -> str:
         display: inline-flex; align-items: center; gap: var(--space-xs);
         padding: 2px 8px; border-radius: var(--radius-full);
         font-family: 'Geist', sans-serif; font-size: var(--text-label); font-weight: 500;
-        letter-spacing: 0.05em; line-height: 1.2; border: 1px solid transparent;
+        letter-spacing: 0.05em; line-height: 1.2; border: 1px solid transparent; white-space: nowrap;
     }
     .c-badge--error { background-color: var(--c-error-container); color: var(--c-error); border-color: rgba(255, 180, 171, 0.3); }
     .c-badge--primary { background-color: rgba(0, 224, 255, 0.15); color: var(--c-primary-container); border-color: rgba(0, 224, 255, 0.3); }
     .c-badge--neutral { background-color: var(--c-layer-highest); color: var(--c-secondary); }
 
     .c-skeleton { background-color: var(--c-layer-high); border-radius: var(--radius-default); animation: pulse 2s infinite; }
+    .c-skeleton--line { height: 16px; width: 100%; margin-bottom: var(--space-sm); }
+    .c-skeleton--title { height: 24px; width: 40%; margin-bottom: var(--space-md); }
+    .c-skeleton--short { height: 16px; width: 60%; margin-top: var(--space-sm); }
     
     .c-metric { display: flex; flex-direction: column; gap: var(--space-xs); }
     .c-metric__title { font-family: 'Geist', sans-serif; font-size: var(--text-label); color: var(--c-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
     .c-metric__value { font-size: var(--text-headline); font-weight: 600; color: var(--c-primary); line-height: 1.1; }
+
+    .c-empty-state {
+        text-align: center;
+        padding: var(--space-xl) var(--space-md);
+        background-color: transparent;
+        border: 1px dashed var(--c-outline-variant);
+        border-radius: var(--radius-xl);
+    }
+    .c-empty-state__icon { font-size: 32px; color: var(--c-secondary); margin-bottom: var(--space-md); }
+
+    .c-meta-label { margin: 0; color: var(--c-secondary); }
+    .c-meta-value { font-family: monospace; margin: 0; color: var(--c-primary); }
     """
 
 def render_card(content_html: str, active_glow: bool = False, class_name: str = ""):
@@ -54,12 +69,33 @@ def render_metric(title: str, value: str, label: Optional[str] = None, variant: 
     </div>
     """, unsafe_allow_html=True)
 
-def render_loading(lines: int = 3):
-    lines_html = "".join(['<div class="c-skeleton" style="height:16px; width:100%; margin-bottom:var(--space-sm);"></div>' for _ in range(lines)])
+def render_empty_state(title: str, description: str, icon: str = "block"):
     st.markdown(f"""
-    <div class="c-card">
-        <div class="c-skeleton" style="height:24px; width:40%; margin-bottom:var(--space-md);"></div>
-        {lines_html}
-        <div class="c-skeleton" style="height:16px; width:60%; margin-top:var(--space-sm);"></div>
+    <div class="c-empty-state">
+        <span class="material-symbols-outlined c-empty-state__icon">{icon}</span>
+        <h3>{title}</h3>
+        <p>{description}</p>
     </div>
     """, unsafe_allow_html=True)
+
+def render_loading(lines: int = 3):
+    lines_html = "".join(['<div class="c-skeleton c-skeleton--line"></div>' for _ in range(lines)])
+    st.markdown(f"""
+    <div class="c-card">
+        <div class="c-skeleton c-skeleton--title"></div>
+        {lines_html}
+        <div class="c-skeleton c-skeleton--short"></div>
+    </div>
+    """, unsafe_allow_html=True)
+
+def render_provider_indicator(provider_name: str, status: str = "primary"):
+    """Renders a provider indicator badge."""
+    return render_badge(f"Provider: {provider_name}", variant=status)
+
+def render_version_indicator(version: str):
+    """Renders a version indicator badge."""
+    return render_badge(f"v{version}", variant="neutral")
+
+def render_progress_indicator(value: int, text: str):
+    """Renders a progress state using native Streamlit."""
+    st.progress(value, text=text)
