@@ -1,0 +1,33 @@
+name: Nightly ML Pipeline
+
+on:
+  schedule:
+    # Runs at 00:00 UTC (Midnight) every single day
+    - cron: '0 0 * * *'
+  
+  # This line adds a physical "Run Workflow" button in your GitHub Actions UI
+  # so you can trigger it manually whenever you want!
+  workflow_dispatch: 
+
+jobs:
+  run-learning-pipeline:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Execute Learning Pipeline Orchestrator
+        env:
+          # Automatically injects your Neon Database URL into the script
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python background_jobs.py pipeline
