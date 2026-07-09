@@ -44,13 +44,12 @@ def bootstrap_pipeline_metadata(db: DatabaseConnection):
         "INSERT INTO audit_logs (action, details) VALUES ('CONFIG_UPDATED', '{\"prompt\": \"v1\", \"model\": \"llama-3.1-8b-instant\", \"actor\": \"admin\"}')"
     ]
     
-    with db.get_cursor(commit_on_success=True) as cur:
-        for q in queries:
-            try:
+    for q in queries:
+        try:
+            with db.get_cursor(commit_on_success=True) as cur:
                 cur.execute(q)
-            except Exception as e:
-                print(f"Skipping metadata bootstrap query due to schema mismatch: {e}")
-                # We catch but don't re-raise, to allow the load test to continue
+        except Exception as e:
+            pass # Silently skip schema/conflict mismatches
 
 def simulate_dead_queue_failures(db: DatabaseConnection, event_service: EventService, num_failures: int):
     """Simulates pipeline failures to populate the Dead Queue and Error metrics."""
