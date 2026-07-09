@@ -17,7 +17,15 @@ def get_layout_css() -> str:
         padding-top: 2rem !important;
         padding-bottom: 2rem !important;
     }
-    header[data-testid="stHeader"] {
+    
+    /* Brutally Hide Streamlit Toolbars, Ribbons, Headers, and Footers */
+    header, [data-testid="stHeader"], [data-testid="stToolbar"], .stAppHeader {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        height: 0 !important;
+    }
+    footer, #MainMenu, #viewerBadge, .viewerBadge_container__1QSob {
         display: none !important;
     }
     
