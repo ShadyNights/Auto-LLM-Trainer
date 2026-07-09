@@ -43,7 +43,19 @@ def run_promote():
     ])
     pipeline.run()
 
+import os
+from dotenv import load_dotenv
+
 def main():
+    load_dotenv()
+    
+    # Map local DB vars to PG env vars expected by connection
+    if os.getenv("DB_HOST"): os.environ["PGHOST"] = os.getenv("DB_HOST")
+    if os.getenv("DB_PORT"): os.environ["PGPORT"] = os.getenv("DB_PORT")
+    if os.getenv("DB_NAME"): os.environ["PGDATABASE"] = os.getenv("DB_NAME")
+    if os.getenv("DB_USER"): os.environ["PGUSER"] = os.getenv("DB_USER")
+    if os.getenv("DB_PASSWORD"): os.environ["PGPASSWORD"] = os.getenv("DB_PASSWORD")
+
     parser = argparse.ArgumentParser(description="Background Jobs CLI for Traveler LLM")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
