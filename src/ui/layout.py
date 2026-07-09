@@ -1,5 +1,6 @@
 import streamlit as st
 from typing import Optional
+import textwrap
 
 def get_layout_css() -> str:
     return """
@@ -21,12 +22,13 @@ def render_header(title: str, subtitle: Optional[str] = None, icon: Optional[str
     icon_html = f"<span aria-hidden='true' class='l-icon'>{icon}</span>" if icon else ""
     subtitle_html = f"<p>{subtitle}</p>" if subtitle else ""
     
-    st.markdown(f"""
-    <div class="l-mb-lg">
-        <h2>{icon_html}{title}</h2>
-        {subtitle_html}
-    </div>
-    """, unsafe_allow_html=True)
+    html = f"""
+<div class="l-mb-lg">
+    <h2>{icon_html}{title}</h2>
+    {subtitle_html}
+</div>
+    """
+    st.markdown(html, unsafe_allow_html=True)
 
 def render_section(title: str, subtitle: Optional[str] = None, icon: Optional[str] = None):
     """Renders a standardized section layout."""

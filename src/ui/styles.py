@@ -14,4 +14,9 @@ def inject_styles():
         get_components_css(),
         get_animations_css()
     ])
-    st.markdown(f"<style>\\n{css}\\n</style>", unsafe_allow_html=True)
+    fonts = (
+        '<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Space+Grotesk:wght@700&family=JetBrains+Mono&display=swap" rel="stylesheet">'
+        '<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">'
+    )
+    st.markdown(fonts, unsafe_allow_html=True)
+    st.markdown(f"<style>\n{css}\n</style>", unsafe_allow_html=True)
