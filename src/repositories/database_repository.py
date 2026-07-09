@@ -21,3 +21,13 @@ class DatabaseRepository:
                 return pd.DataFrame()
         except Exception:
             return pd.DataFrame()
+
+    def get_record_count(self, table: TableType) -> int:
+        """Returns the total number of records in a table."""
+        try:
+            with self.db.get_cursor() as cur:
+                cur.execute(f"SELECT COUNT(*) as cnt FROM {table.value}")
+                row = cur.fetchone()
+                return row['cnt'] if row else 0
+        except Exception:
+            return 0

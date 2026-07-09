@@ -13,10 +13,10 @@ def render_database_manager_view(repo: DatabaseRepository):
     
     # 1. Summary Cards
     c1, c2, c3, c4 = st.columns(4)
-    with c1: render_metric_card("Itineraries", str(len(fetch_table(repo, TableType.ITINERARIES))), "map")
-    with c2: render_metric_card("Conversations", str(len(fetch_table(repo, TableType.CONVERSATIONS))), "forum")
-    with c3: render_metric_card("Events", str(len(fetch_table(repo, TableType.EVENTS))), "bolt")
-    with c4: render_metric_card("Audit Logs", str(len(fetch_table(repo, TableType.AUDIT_LOGS))), "security")
+    with c1: render_metric_card("Itineraries", str(repo.get_record_count(TableType.ITINERARIES)), "map")
+    with c2: render_metric_card("Conversations", str(repo.get_record_count(TableType.CONVERSATIONS)), "forum")
+    with c3: render_metric_card("Events", str(repo.get_record_count(TableType.EVENTS)), "bolt")
+    with c4: render_metric_card("Audit Logs", str(repo.get_record_count(TableType.AUDIT_LOGS)), "security")
     
     st.markdown("---")
     
