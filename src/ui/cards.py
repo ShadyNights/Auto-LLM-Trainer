@@ -8,22 +8,7 @@ def render_itinerary_card(itinerary_text: str):
 
 def render_analytics_card(itinerary_id: str, corr_id: str):
     """Renders telemetry and pipeline tracking data for an itinerary."""
-    analytics_html = f"""
-    <div class="l-stack">
-        <div>
-            <p class="c-meta-label">Itinerary ID</p>
-            <p class="c-meta-value">{itinerary_id}</p>
-        </div>
-        <div>
-            <p class="c-meta-label">Correlation ID</p>
-            <p class="c-meta-value">{corr_id}</p>
-        </div>
-        <div>
-            <p class="c-meta-label">Status</p>
-            {render_badge('Pipeline Queued', 'primary')}
-        </div>
-    </div>
-    """
+    analytics_html = f'<div class="l-stack"><div><p class="c-meta-label">Itinerary ID</p><p class="c-meta-value">{itinerary_id}</p></div><div><p class="c-meta-label">Correlation ID</p><p class="c-meta-value">{corr_id}</p></div><div><p class="c-meta-label">Status</p>{render_badge("Pipeline Queued", "primary")}</div></div>'
     render_card(analytics_html)
 
 def render_feedback_form() -> tuple[Optional[int], Optional[str], bool]:
@@ -45,42 +30,22 @@ def render_feedback_form() -> tuple[Optional[int], Optional[str], bool]:
 
 def render_timeline_card(day: int, content: str):
     """Renders a Day Timeline activity card."""
-    html = f"""
-    <div>
-        <p class="c-meta-label">Day {day}</p>
-        <p>{content}</p>
-    </div>
-    """
+    html = f'<div><p class="c-meta-label">Day {day}</p><p>{content}</p></div>'
     render_card(html)
 
 def render_ai_suggestion_card(suggestion: str):
     """Renders an AI Recommendation card with accent glow."""
-    html = f"""
-    <div>
-        <p class="c-meta-label">✨ AI Suggestion</p>
-        <p>{suggestion}</p>
-    </div>
-    """
+    html = f'<div><p class="c-meta-label">✨ AI Suggestion</p><p>{suggestion}</p></div>'
     render_card(html, active_glow=True)
 
 def render_information_card(title: str, content: str):
     """Renders a standard Information Card."""
-    html = f"""
-    <div>
-        <p class="c-meta-label">{title}</p>
-        <p>{content}</p>
-    </div>
-    """
+    html = f'<div><p class="c-meta-label">{title}</p><p>{content}</p></div>'
     render_card(html)
 
 def render_status_card(title: str, is_active: bool):
     """Renders a Status Card."""
     variant = "primary" if is_active else "error"
     badge = render_badge("Active" if is_active else "Offline", variant)
-    html = f"""
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-        <p class="c-meta-label">{title}</p>
-        {badge}
-    </div>
-    """
+    html = f'<div style="display:flex; justify-content:space-between; align-items:center;"><p class="c-meta-label">{title}</p>{badge}</div>'
     render_card(html)

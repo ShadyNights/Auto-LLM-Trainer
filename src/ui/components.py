@@ -71,8 +71,8 @@ def render_card(content_html: str, active_glow: bool = False, class_name: str = 
     classes = ["c-card"]
     if active_glow: classes.append("c-card--active-glow")
     if class_name: classes.append(class_name)
-    html = f'<div class="{" ".join(classes)}">\n{content_html}\n</div>'
-    st.markdown(html.replace('\\n', ''), unsafe_allow_html=True)
+    html = f'<div class="{" ".join(classes)}">{content_html}</div>'
+    st.markdown(html, unsafe_allow_html=True)
 
 def render_badge(text: str, variant: str = "neutral", class_name: str = "") -> str:
     return f'<span class="c-badge c-badge--{variant} {class_name}">{text}</span>'
@@ -82,38 +82,17 @@ def render_metric(title: str, value: str, icon: str = "", trend_label: Optional[
     icon_html = f"<span class='material-symbols-outlined' style='font-size:16px;'>{icon}</span>" if icon else ""
     context_html = f"<div class='c-metric-card__context'>{context}</div>" if context else ""
     
-    html = f"""
-<div class="c-metric-card">
-    <div class="c-metric-card__header">
-        <div class="c-metric-card__title">{icon_html} {title}</div>
-        {trend_html}
-    </div>
-    <div class="c-metric-card__value">{value}</div>
-    {context_html}
-</div>
-    """
-    st.markdown(html.replace('\\n', ''), unsafe_allow_html=True)
+    html = f'<div class="c-metric-card"><div class="c-metric-card__header"><div class="c-metric-card__title">{icon_html} {title}</div>{trend_html}</div><div class="c-metric-card__value">{value}</div>{context_html}</div>'
+    st.markdown(html, unsafe_allow_html=True)
 
 def render_empty_state(title: str, description: str, icon: str = "block"):
-    html = f"""
-<div class="c-empty-state">
-    <span class="material-symbols-outlined c-empty-state__icon">{icon}</span>
-    <h3>{title}</h3>
-    <p>{description}</p>
-</div>
-    """
-    st.markdown(html.replace('\\n', ''), unsafe_allow_html=True)
+    html = f'<div class="c-empty-state"><span class="material-symbols-outlined c-empty-state__icon">{icon}</span><h3>{title}</h3><p>{description}</p></div>'
+    st.markdown(html, unsafe_allow_html=True)
 
 def render_loading(lines: int = 3):
     lines_html = "".join(['<div class="c-skeleton c-skeleton--line"></div>' for _ in range(lines)])
-    html = f"""
-<div class="c-card">
-    <div class="c-skeleton c-skeleton--title"></div>
-    {lines_html}
-    <div class="c-skeleton c-skeleton--short"></div>
-</div>
-    """
-    st.markdown(html.replace('\\n', ''), unsafe_allow_html=True)
+    html = f'<div class="c-card"><div class="c-skeleton c-skeleton--title"></div>{lines_html}<div class="c-skeleton c-skeleton--short"></div></div>'
+    st.markdown(html, unsafe_allow_html=True)
 
 def render_provider_indicator(provider_name: str, status: str = "primary"):
     """Renders a provider indicator badge."""
