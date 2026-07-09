@@ -1,81 +1,62 @@
 from typing import Dict, Any, List
 from src.infrastructure.database.connection import DatabaseConnection
+from src.domain.dto.ui_dtos import AnalyticsDTO, DestinationStat, RatingStat, BudgetStat, PipelineStat
 
 class AnalyticsRepository:
     def __init__(self, db: DatabaseConnection):
         self.db = db
 
-    def get_ai_metrics(self) -> Dict[str, Any]:
-        """Fetches high-level metrics for the AI Metrics dashboard."""
-        metrics = {
-            'data_points': 0,
-            'training_cycles': 0,
-            'average_rating': 0.0
-        }
+    def get_analytics(self) -> AnalyticsDTO:
+        dto = AnalyticsDTO(
+            recent_conversations=0,
+            recent_generations=0,
+            destinations=[],
+            ratings=[],
+            budgets=[],
+            pipeline=PipelineStat(0, 0, 0)
+        )
         
         try:
             with self.db.get_cursor() as cur:
-                # Total Data Points (Itineraries generated)
-                cur.execute("SELECT COUNT(*) as count FROM itineraries")
+                # Last 30 Days Usage
+                cur.execute("SELECT COUNT(*) as cnt FROM conversations WHERE created_at > NOW() - INTERVAL '30 days'")
                 row = cur.fetchone()
-                if row: metrics['data_points'] = row['count']
+                if row: dto.recent_conversations = row['cnt']
                 
-                # Training Cycles
-                cur.execute("SELECT COUNT(*) as count FROM training_queue WHERE status = 'completed'")
+                cur.execute("SELECT COUNT(*) as cnt FROM itineraries WHERE created_at > NOW() - INTERVAL '30 days'")
                 row = cur.fetchone()
-                if row: metrics['training_cycles'] = row['count']
+                if row: dto.recent_generations = row['cnt']
                 
-                # Average Rating
-                cur.execute("SELECT AVG(rating) as avg_rating FROM itineraries WHERE rating > 0")
-                row = cur.fetchone()
-                if row and row['avg_rating'] is not None:
-                    metrics['average_rating'] = round(row['avg_rating'], 1)
+                # Destinations
+                cur.execute("SELECT destination, trip_count, avg_rating FROM popular_destinations LIMIT 10")
+                for r in cur.fetchall():
+                    dto.destinations.append(DestinationStat(r['destination'], r['trip_count'], float(r['avg_rating'] or 0.0)))
+                
+                # Ratings
+                cur.execute("SELECT rating, COUNT(*) as count FROM itineraries WHERE rating > 0 GROUP BY rating ORDER BY rating DESC")
+                for r in cur.fetchall():
+                    dto.ratings.append(RatingStat(r['rating'], r['count']))
+                    
+                # Budgets
+                cur.execute("SELECT budget_level, COUNT(*) as count FROM trips GROUP BY budget_level ORDER BY count DESC")
+                for r in cur.fetchall():
+                    dto.budgets.append(BudgetStat(r['budget_level'], r['count']))
+                    
+                # Pipeline
+                cur.execute("SELECT COUNT(*) as cnt FROM datasets")
+                d_row = cur.fetchone()
+                cur.execute("SELECT COUNT(*) as cnt FROM prompts_metadata")
+                p_row = cur.fetchone()
+                cur.execute("SELECT COUNT(*) as cnt FROM model_versions")
+                m_row = cur.fetchone()
+                
+                dto.pipeline = PipelineStat(
+                    total_datasets=d_row['cnt'] if d_row else 0,
+                    total_prompts=p_row['cnt'] if p_row else 0,
+                    total_models=m_row['cnt'] if m_row else 0
+                )
+                
         except Exception:
             pass
             
-        return metrics
-
-    def get_popular_destinations(self, limit: int = 5) -> List[Dict[str, Any]]:
-        """Fetches popular destinations from the SQL view."""
-        try:
-            with self.db.get_cursor() as cur:
-                cur.execute("SELECT destination, trip_count, avg_rating FROM popular_destinations LIMIT %s", (limit,))
-                return cur.fetchall()
-        except Exception:
-            return []
-
-    def get_rating_distribution(self) -> List[Dict[str, Any]]:
-        """Fetches the distribution of user ratings."""
-        try:
-            with self.db.get_cursor() as cur:
-                cur.execute("""
-                    SELECT rating, COUNT(*) as count 
-                    FROM itineraries 
-                    WHERE rating > 0 
-                    GROUP BY rating 
-                    ORDER BY rating DESC
-                """)
-                return cur.fetchall()
-        except Exception:
-            return []
-
-    def get_recent_records(self, limit: int = 50) -> List[Dict[str, Any]]:
-        """Fetches flat list of recent generated trips for the Database Manager."""
-        try:
-            with self.db.get_cursor() as cur:
-                cur.execute("""
-                    SELECT 
-                        i.id as itinerary_id, 
-                        t.destination, 
-                        t.duration, 
-                        t.budget_level, 
-                        i.rating, 
-                        i.created_at
-                    FROM itineraries i
-                    JOIN trips t ON i.trip_id = t.id
-                    ORDER BY i.id DESC
-                    LIMIT %s
-                """, (limit,))
-                return cur.fetchall()
-        except Exception:
-            return []
+        return dto

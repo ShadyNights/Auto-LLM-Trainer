@@ -28,16 +28,21 @@ from src.ui.dashboard import render_hero_dashboard, render_processing_state, ren
 from src.ui.helpers import sanitize_text
 
 from src.repositories.analytics_repository import AnalyticsRepository
-from src.ui.pages.trip_summary_view import render_trip_summary
-from src.ui.pages.ai_metrics_view import render_ai_metrics
-from src.ui.pages.analytics_view import render_analytics_dashboard
-from src.ui.pages.database_view import render_database_manager
+from src.repositories.metrics_repository import MetricsRepository
+from src.repositories.trip_repository import TripRepository
+from src.repositories.database_repository import DatabaseRepository
+from src.ui.state.dashboard_state import DashboardState
+from src.ui.views.trip_summary import render_trip_summary_view
+from src.ui.views.ai_metrics import render_ai_metrics_view
+from src.ui.views.analytics import render_analytics_view
+from src.ui.views.database_manager import render_database_manager_view
 
 load_dotenv(override=True)
 logger = get_json_logger(__name__)
 
 st.set_page_config(page_title="Traveler LLM", page_icon="✈️", layout="wide")
 inject_styles()
+DashboardState.init_state()
 
 try:
     # ==================== BOOTSTRAP DEPENDENCIES ====================
@@ -48,6 +53,9 @@ try:
     training_repo = TrainingRepository(db)
     itinerary_repo = ItineraryRepository(db)
     analytics_repo = AnalyticsRepository(db)
+    metrics_repo = MetricsRepository(db)
+    trip_repo = TripRepository(db)
+    database_repo = DatabaseRepository(db)
 
     provider = GroqProvider()
     planner_service = PlannerService(config_repo, prompt_repo, provider)
@@ -128,7 +136,7 @@ try:
             else:
                 interest_list = [i.strip() for i in interests.split(",")] if interests else []
                 # Store params for the Trip Summary page
-                st.session_state.trip_params = {'city': city_clean, 'days': days, 'budget': budget, 'interests': interest_list}
+                DashboardState.set_last_trip_params({'city': city_clean, 'days': days, 'budget': budget, 'interests': interest_list})
                 
                 req = ItineraryRequest(city=city_clean, budget=budget, trip_days=days, interests=interest_list, travel_style=["Solo"])
                 corr_id = event_service.log_prompt_submitted(st.session_state.conversation_id, city_clean, budget, days)
@@ -153,6 +161,7 @@ try:
                     st.session_state.itinerary = response.text
                     st.session_state.itinerary_id = itin_id
                     st.session_state.corr_id = corr_id
+                    DashboardState.set_active_itinerary_id(itin_id)
                     st.rerun() # Refresh to show results cleanly
                     
                 except Exception as e:
@@ -173,13 +182,13 @@ try:
                 st.success("✅ Feedback securely recorded and queued for pipeline processing.")
                 
     elif current_page == "Trip Summary":
-        render_trip_summary()
+        render_trip_summary_view(trip_repo)
     elif current_page == "AI Metrics":
-        render_ai_metrics(analytics_repo)
+        render_ai_metrics_view(metrics_repo)
     elif current_page == "Analytics Dashboard":
-        render_analytics_dashboard(analytics_repo)
+        render_analytics_view(analytics_repo)
     elif current_page == "Database Manager":
-        render_database_manager(analytics_repo)
+        render_database_manager_view(database_repo)
 
 except TravelerException as te:
     logger.error("Domain exception occurred", exc_info=True, extra={"status": "failed"})
