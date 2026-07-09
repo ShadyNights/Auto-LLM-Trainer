@@ -17,7 +17,7 @@ class CollectStage(PipelineStage):
     def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
         logger.info("Executing CollectStage")
         # Collect pending items from the queue
-        pending = self.training_repo.get_pending_tasks(limit=50)
+        pending = self.training_repo.get_pending_tasks(limit=1000)
         context["pending_tasks"] = pending
         return context
 
