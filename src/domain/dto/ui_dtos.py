@@ -11,6 +11,7 @@ class TripSummaryDTO:
     interests: List[str]
     trip_complexity: int
     generation_time_ms: Optional[int]
+    itinerary_text: str
     provider: str
     prompt_version: str
     model_version: str
