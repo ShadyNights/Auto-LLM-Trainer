@@ -25,8 +25,9 @@ from src.infrastructure.logging.json_logger import get_json_logger
 # UI Components
 from src.ui.styles import inject_styles
 from src.ui.components import (
-    render_hero, render_metric, render_empty_state, 
-    render_badge, render_page_section, render_skeleton_loader, render_card
+    render_header, render_metric, render_empty_state, 
+    render_badge, render_section, render_loading, render_card,
+    render_ai_transparency_footer
 )
 
 load_dotenv(override=True)
@@ -100,12 +101,12 @@ try:
     # ==================== SIDEBAR ====================
     with st.sidebar:
         # 1. Workspace
-        render_page_section("Workspace", icon="🛠️")
+        render_section("Workspace", icon="🛠️")
         st.markdown(f"<p class='text-muted'>Session ID: <code>{st.session_state.conversation_id}</code></p>", unsafe_allow_html=True)
         st.markdown("<hr/>", unsafe_allow_html=True)
         
         # 2. Health
-        render_page_section("System Health", icon="⚙️")
+        render_section("System Health", icon="⚙️")
         if warnings:
             st.markdown(render_badge("Degraded", "warning"), unsafe_allow_html=True)
             for w in warnings:
@@ -115,7 +116,7 @@ try:
         st.markdown("<hr/>", unsafe_allow_html=True)
             
         # 3. Configuration
-        render_page_section("Configuration", icon="🧠")
+        render_section("Configuration", icon="🧠")
         try:
             config = config_repo.get_active_config()
             st.markdown(f"<p class='text-muted' style='margin:0;'>Provider: <b>Groq</b></p>", unsafe_allow_html=True)
@@ -126,7 +127,7 @@ try:
         st.markdown("<hr/>", unsafe_allow_html=True)
 
         # 4. Metrics
-        render_page_section("Metrics", icon="📊")
+        render_section("Metrics", icon="📊")
         try:
             with db.get_cursor(commit_on_success=False) as cur:
                 cur.execute("SELECT * FROM dashboard_metrics")
@@ -148,7 +149,7 @@ try:
             render_metric("Metrics", "Offline", "DB Error", "error")
 
     # ==================== MAIN CONTENT ====================
-    render_hero(
+    render_header(
         title="Traveler LLM", 
         subtitle="Automated itinerary curation powered by a Continuous Feedback Learning Pipeline.",
         icon="✈️"
@@ -156,7 +157,7 @@ try:
 
     # 1. Configuration (Input Form)
     with st.container():
-        render_page_section("Configure Request", "Set the parameters for your next adventure.")
+        render_section("Configure Request", "Set the parameters for your next adventure.")
         with st.form("travel_form"):
             col_a, col_b = st.columns(2)
             with col_a:
@@ -180,8 +181,8 @@ try:
             corr_id = event_service.log_prompt_submitted(st.session_state.conversation_id, city_clean, budget, days)
             
             st.markdown("<br/>", unsafe_allow_html=True)
-            render_page_section("Generation in Progress", "The LLM is processing your request...")
-            render_skeleton_loader()
+            render_section("Generation in Progress", "The LLM is processing your request...")
+            render_loading()
             
             try:
                 response, config, p_ver, d_ver = planner_service.generate_itinerary(req)
@@ -210,12 +211,22 @@ try:
     # 3. Result, Analytics & Feedback Flow
     if "itinerary" in st.session_state and not submitted:
         st.markdown("<br/>", unsafe_allow_html=True)
-        render_page_section("Generated Results", "Your requested itinerary is ready.")
+        render_section("Generated Results", "Your requested itinerary is ready.")
         
         tab1, tab2, tab3 = st.tabs(["📝 Itinerary", "⚙️ Analytics", "⭐ Feedback"])
         
         with tab1:
-            render_card(st.session_state.itinerary)
+            from datetime import datetime
+            
+            result_html = f"{st.session_state.itinerary}"
+            result_html += render_ai_transparency_footer(
+                provider="Groq",
+                model="llama-3.3-70b",
+                prompt_version="v1",
+                config_version="v1",
+                timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            )
+            render_card(result_html, ai_glow=True)
             
         with tab2:
             analytics_html = f"""
