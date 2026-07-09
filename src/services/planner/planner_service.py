@@ -49,7 +49,8 @@ class PlannerService:
             city=request.city,
             trip_days=request.trip_days,
             budget=request.budget,
-            interests=", ".join(request.interests)
+            interests=", ".join(request.interests),
+            travel_style=", ".join(request.travel_style)
         )
         
         # Build provider request
