@@ -33,20 +33,24 @@ INTERESTS = [
 def bootstrap_pipeline_metadata(db: DatabaseConnection):
     """Bootstraps the datasets, models, prompts, configs, and audit logs to fully populate the DB Manager."""
     print("Bootstraps pipeline metadata (Datasets, Models, Prompts, Configs, Logs)...")
-    with db.get_cursor() as cur:
-        # 1. Dataset
-        cur.execute("INSERT INTO datasets (name, description, record_count) VALUES ('ds-v1', 'Initial training dataset', 1500) ON CONFLICT DO NOTHING")
-        # 2. Prompt Metadata
-        cur.execute("INSERT INTO prompts_metadata (version_name, description, checksum) VALUES ('v1', 'Baseline prompt', 'abc123hash') ON CONFLICT DO NOTHING")
-        # 3. Model Versions
-        cur.execute("INSERT INTO model_versions (provider, version_name, is_active) VALUES ('Groq', 'llama-3.1-8b-instant', true) ON CONFLICT DO NOTHING")
-        # 4. System Config
-        cur.execute("INSERT INTO system_config (active_prompt_id, active_model_id, is_active) VALUES (1, 1, true) ON CONFLICT DO NOTHING")
-        # 5. Config Evaluations
-        cur.execute("INSERT INTO config_evaluations (config_id, dataset_id, success_rate, avg_quality_score) VALUES (1, 1, 95.5, 88.2) ON CONFLICT DO NOTHING")
-        # 6. Audit Logs
-        cur.execute("INSERT INTO audit_logs (action, actor, details) VALUES ('SYSTEM_STARTUP', 'system', '{\"message\": \"Test data pipeline initialized\"}')")
-        cur.execute("INSERT INTO audit_logs (action, actor, details) VALUES ('CONFIG_UPDATED', 'admin', '{\"prompt\": \"v1\", \"model\": \"llama-3.1-8b-instant\"}')")
+    
+    queries = [
+        "INSERT INTO datasets (name, description, record_count) VALUES ('ds-v1', 'Initial training dataset', 1500) ON CONFLICT DO NOTHING",
+        "INSERT INTO prompts_metadata (version_name, description, checksum) VALUES ('v1', 'Baseline prompt', 'abc123hash') ON CONFLICT DO NOTHING",
+        "INSERT INTO model_versions (provider, version_name, is_active) VALUES ('Groq', 'llama-3.1-8b-instant', true) ON CONFLICT DO NOTHING",
+        "INSERT INTO system_config (active_prompt_id, active_model_id, is_active) VALUES (1, 1, true) ON CONFLICT DO NOTHING",
+        "INSERT INTO config_evaluations (config_id, dataset_id, success_rate, avg_quality_score) VALUES (1, 1, 95.5, 88.2) ON CONFLICT DO NOTHING",
+        "INSERT INTO audit_logs (action, actor, details) VALUES ('SYSTEM_STARTUP', 'system', '{\"message\": \"Test data pipeline initialized\"}')",
+        "INSERT INTO audit_logs (action, actor, details) VALUES ('CONFIG_UPDATED', 'admin', '{\"prompt\": \"v1\", \"model\": \"llama-3.1-8b-instant\"}')"
+    ]
+    
+    with db.get_cursor(commit_on_success=True) as cur:
+        for q in queries:
+            try:
+                cur.execute(q)
+            except Exception as e:
+                print(f"Skipping metadata bootstrap query due to schema mismatch: {e}")
+                # We catch but don't re-raise, to allow the load test to continue
 
 def simulate_dead_queue_failures(db: DatabaseConnection, event_service: EventService, num_failures: int):
     """Simulates pipeline failures to populate the Dead Queue and Error metrics."""
