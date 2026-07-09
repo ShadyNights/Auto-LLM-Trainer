@@ -2,13 +2,13 @@ import streamlit as st
 from typing import List, Tuple
 from .layout import render_section
 
-def render_travel_form() -> Tuple[str, int, str, str, bool]:
+def render_travel_form() -> Tuple[str, int, str, str, str, bool]:
     """
     Renders the main travel configuration form inside an elevated card.
-    Returns: (city, days, interests, budget, is_submitted)
+    Returns: (city, days, interests, budget, travel_style, is_submitted)
     """
     st.markdown("<div class='c-card'>", unsafe_allow_html=True)
-    render_section("Configure Request", "Set the parameters for your next adventure.", icon="tune")
+    render_section("Trip Configuration", "Set the parameters for your next adventure.", icon="tune")
     
     with st.form("travel_form"):
         col_a, col_b = st.columns(2)
@@ -22,12 +22,14 @@ def render_travel_form() -> Tuple[str, int, str, str, bool]:
             st.caption("Comma-separated topics.")
             budget = st.selectbox("Budget Profile", ["Budget", "Moderate", "Luxury"])
             st.caption("Select your spending style.")
+            travel_style = st.selectbox("Travel Style", ["Solo", "Duo", "Family", "Friends", "Business"])
+            st.caption("Who are you traveling with?")
             
         st.markdown("<hr style='margin-top:8px; border-color:var(--c-outline-variant);'/>", unsafe_allow_html=True)
         submitted = st.form_submit_button("Generate Premium Itinerary")
         
     st.markdown("</div>", unsafe_allow_html=True)
-    return city, days, interests, budget, submitted
+    return city, days, interests, budget, travel_style, submitted
 
 def render_search_input(placeholder: str = "Search...") -> str:
     """Renders a modern search input (mock component for full library compliance)."""

@@ -126,7 +126,7 @@ try:
 
         # 1. Configuration (Input Form)
         with st.container():
-            city, days, interests, budget, submitted = render_travel_form()
+            city, days, interests, budget, travel_style, submitted = render_travel_form()
 
         # 2. Generation Phase
         if submitted:
@@ -136,9 +136,9 @@ try:
             else:
                 interest_list = [i.strip() for i in interests.split(",")] if interests else []
                 # Store params for the Trip Summary page
-                DashboardState.set_last_trip_params({'city': city_clean, 'days': days, 'budget': budget, 'interests': interest_list})
+                DashboardState.set_last_trip_params({'city': city_clean, 'days': days, 'budget': budget, 'interests': interest_list, 'travel_style': travel_style})
                 
-                req = ItineraryRequest(city=city_clean, budget=budget, trip_days=days, interests=interest_list, travel_style=["Solo"])
+                req = ItineraryRequest(city=city_clean, budget=budget, trip_days=days, interests=interest_list, travel_style=[travel_style])
                 corr_id = event_service.log_prompt_submitted(st.session_state.conversation_id, city_clean, budget, days)
                 
                 render_processing_state()

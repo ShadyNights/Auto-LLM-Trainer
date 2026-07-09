@@ -21,7 +21,8 @@ def render_sidebar(
         # 1. Workspace
         render_section("Workspace", icon="🛠️")
         st.markdown(f"<p class='c-meta-label'>Session ID</p>", unsafe_allow_html=True)
-        st.markdown(f"<code class='c-meta-value'>{session_id}</code>", unsafe_allow_html=True)
+        session_display = session_id if session_id else "New Session"
+        st.markdown(f"<code class='c-meta-value'>{session_display}</code>", unsafe_allow_html=True)
         render_divider()
         
         # 2. Health
@@ -37,7 +38,6 @@ def render_sidebar(
         # 3. Configuration
         render_section("Configuration", icon="🧠")
         if config_active:
-            st.markdown(f"<p class='c-meta-label'>Provider: <span class='c-meta-value'>Groq</span></p>", unsafe_allow_html=True)
             st.markdown(f"<p class='c-meta-label'>Prompt: <span class='c-meta-value'>v1</span></p>", unsafe_allow_html=True)
             st.markdown(f"<p class='c-meta-label'>Dataset: <span class='c-meta-value'>ds-v1</span></p>", unsafe_allow_html=True)
         else:
