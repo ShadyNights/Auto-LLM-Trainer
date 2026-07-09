@@ -1,6 +1,7 @@
 import streamlit as st
 from src.ui import components
 from src.ui.icons import Icons
+import textwrap
 
 class BaseLayout:
     """Provides standard layout constraints and injections."""
@@ -35,16 +36,27 @@ class SidebarLayout:
     @staticmethod
     def render(session_id: str, warnings: list = None):
         with st.sidebar:
-            st.html("<div style='margin-bottom: var(--space-6);'><span class='type-display' style='font-size: 24px; color: var(--color-accent-primary); letter-spacing: -0.02em;'>Traveler LLM</span></div>")
-            
-            components.render_user_profile()
+            st.html("""
+            <div class="h-full flex flex-col gap-xl">
+                <!-- Header -->
+                <div class="flex items-center gap-md px-md mb-8">
+                    <div class="w-12 h-12 rounded-full overflow-hidden shrink-0 ring-1 ring-outline-variant shadow-sm">
+                        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZvYxtOPSuoT8fq8jXUBiiXhZ-X9rqmlf4QguRuexgAIiXj3LzBAR5_5jejlXJFZ1MBujzaLbhBn9-cwjpNHAUS2-Z0qrUYV1iewStCRo58GW53xY2tVTeJcc4CepJxF2MPukPLmdB_SPFJhAYyiKMbCH2W4fQU2hzi8Co6VmuPizGxQ-B0hsJKQNvz-i7xzQrsoeiAklxqbIGbA7tfej0XD7vSfN6ko_ZYLbno-15lnRUk1-VkSOGIg" class="w-full h-full object-cover" />
+                    </div>
+                    <div class="flex flex-col min-w-0">
+                        <span class="font-headline-md text-headline-md text-on-surface truncate">Traveler LLM</span>
+                        <span class="font-body-md text-sm text-on-surface-variant truncate">Modern AI Professional</span>
+                    </div>
+                </div>
+            </div>
+            """)
             
             st.button("New Itinerary", use_container_width=True, type="primary", icon=Icons.ADD)
             
             st.html("<div style='margin: var(--space-6) 0;'></div>")
             
             # Workspace Group
-            st.html("<span class='type-caption' style='padding-left: var(--space-4); margin-bottom: var(--space-2); display: block;'>Workspace</span>")
+            st.html("<span class='px-md py-xs font-code-sm text-xs text-on-surface-variant uppercase tracking-wider block mb-2'>Workspace</span>")
             components.render_sidebar_link("Dashboard", Icons.DASHBOARD, is_active=False)
             components.render_sidebar_link("Itinerary Planner", Icons.SPARKLES, is_active=True)
             components.render_sidebar_link("Active Trips", Icons.MAP, is_active=False)
@@ -52,7 +64,7 @@ class SidebarLayout:
             st.html("<div style='margin: var(--space-6) 0;'></div>")
             
             # Operations Group
-            st.html("<span class='type-caption' style='padding-left: var(--space-4); margin-bottom: var(--space-2); display: block;'>Operations</span>")
+            st.html("<span class='px-md py-xs font-code-sm text-xs text-on-surface-variant uppercase tracking-wider block mb-2'>Operations</span>")
             components.render_sidebar_link("System Health", Icons.HEARTBEAT, is_active=False)
             components.render_sidebar_link("Configuration", Icons.SETTINGS, is_active=False)
             
@@ -71,55 +83,171 @@ class SidebarLayout:
 class DashboardLayout:
     @staticmethod
     def render_hero():
-        components.render_page_header(
-            title="Traveler LLM",
-            subtitle="Automated itinerary curation powered by a Continuous Feedback Learning Pipeline.",
-            status_badge="Pipeline Active"
-        )
+        html = """
+        <section class="flex flex-col gap-md mb-8">
+            <div class="flex flex-col gap-sm">
+                <h1 class="font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mb-2">Traveler LLM</h1>
+                <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">Automated itinerary curation powered by a Continuous Feedback Learning Pipeline.</p>
+            </div>
+            <div class="flex flex-wrap gap-sm mt-xs">
+                <span class="inline-flex items-center gap-xs px-sm py-1 bg-surface-container border border-outline-variant rounded-full font-code-sm text-[11px] text-on-surface-variant">
+                    <span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span> Active Provider: Groq
+                </span>
+                <span class="inline-flex items-center gap-xs px-sm py-1 bg-surface-container border border-outline-variant rounded-full font-code-sm text-[11px] text-on-surface-variant">
+                    Prompt: v1.2
+                </span>
+                <span class="inline-flex items-center gap-xs px-sm py-1 bg-surface-container border border-outline-variant rounded-full font-code-sm text-[11px] text-on-surface-variant">
+                    Pipeline: Active
+                </span>
+            </div>
+        </section>
+        """
+        st.html(html)
         
     @staticmethod
     def render_metrics(metrics: dict):
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            components.render_metric(
-                label="Total Conversations", 
-                value=str(metrics.get('total_conversations', 0)),
-                icon=Icons.FORUM,
-                trend="+12% this week",
-                trend_positive=True
-            )
-        with col2:
-            rating = metrics.get('average_rating', 0)
-            rating_str = f"{rating:.1f}" if rating else "N/A"
-            components.render_metric(
-                label="Avg Rating", 
-                value=rating_str,
-                icon=Icons.STAR,
-                trend="Consistent High Quality",
-                trend_positive=True
-            )
-        with col3:
-            fails = metrics.get('generation_failures', 0)
-            trend = "Needs Review" if fails > 0 else "System Stable"
-            components.render_metric(
-                label="Gen Failures", 
-                value=str(fails),
-                icon=Icons.BUG,
-                trend=trend,
-                trend_positive=(fails == 0)
-            )
+        total_conv = metrics.get('total_conversations', 0)
+        rating = metrics.get('average_rating', 0)
+        fails = metrics.get('generation_failures', 0)
+        rating_str = f"{rating:.1f}" if rating else "N/A"
+        
+        html = f"""
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-md mb-8">
+            <!-- Metric 1 -->
+            <div class="bg-surface-container border border-outline-variant rounded-xl p-md flex flex-col gap-sm shadow-sm">
+                <div class="flex items-center justify-between text-on-surface-variant mb-2">
+                    <span class="font-label-xs text-label-xs uppercase tracking-wider">Total Conversations</span>
+                    <span class="material-symbols-outlined" style="font-size: 18px;">forum</span>
+                </div>
+                <div class="font-code-sm text-[32px] font-bold text-on-surface leading-none mt-xs">{total_conv}</div>
+                <div class="font-body-md text-sm text-on-surface-variant mb-4">All time interactions</div>
+                <div class="flex items-center gap-xs text-primary-container font-code-sm text-xs mt-auto pt-sm border-t border-outline-variant/50">
+                    <span class="material-symbols-outlined" style="font-size: 14px;">trending_up</span>
+                    <span>+12% this week</span>
+                </div>
+            </div>
+            <!-- Metric 2 -->
+            <div class="bg-surface-container border border-outline-variant rounded-xl p-md flex flex-col gap-sm shadow-sm">
+                <div class="flex items-center justify-between text-on-surface-variant mb-2">
+                    <span class="font-label-xs text-label-xs uppercase tracking-wider">Avg Rating</span>
+                    <span class="material-symbols-outlined" style="font-size: 18px;">star</span>
+                </div>
+                <div class="font-code-sm text-[32px] font-bold text-on-surface leading-none mt-xs">{rating_str}</div>
+                <div class="font-body-md text-sm text-on-surface-variant mb-4">Based on user feedback</div>
+                <div class="flex items-center gap-xs text-on-surface-variant font-code-sm text-xs mt-auto pt-sm border-t border-outline-variant/50">
+                    <span>Consistent High Quality</span>
+                </div>
+            </div>
+            <!-- Metric 3 -->
+            <div class="bg-surface-container border border-outline-variant rounded-xl p-md flex flex-col gap-sm shadow-sm">
+                <div class="flex items-center justify-between text-on-surface-variant mb-2">
+                    <span class="font-label-xs text-label-xs uppercase tracking-wider">Gen Failures</span>
+                    <span class="material-symbols-outlined" style="font-size: 18px;">bug_report</span>
+                </div>
+                <div class="font-code-sm text-[32px] font-bold text-on-surface leading-none mt-xs">{'Optimal' if fails == 0 else fails}</div>
+                <div class="font-body-md text-sm text-on-surface-variant mb-4">Error rate within threshold</div>
+                <div class="flex items-center gap-xs text-primary-container font-code-sm text-xs mt-auto pt-sm border-t border-outline-variant/50">
+                    <span class="material-symbols-outlined" style="font-size: 14px;">check_circle</span>
+                    <span>System Stable</span>
+                </div>
+            </div>
+        </section>
+        """
+        st.html(html)
+
+    @staticmethod
+    def render_system_status():
+        html = """
+        <section class="flex flex-col gap-lg w-full h-full">
+            <!-- System Health Card -->
+            <div class="bg-surface-container border border-outline-variant rounded-xl p-md shadow-sm mb-6">
+                <h3 class="font-headline-md text-[18px] text-on-surface mb-md flex items-center gap-sm mb-4">
+                    <span class="material-symbols-outlined text-on-surface-variant">monitor_heart</span>
+                    System Status
+                </h3>
+                <div class="flex items-center justify-between bg-surface-container-low border border-outline-variant rounded-lg p-md shadow-sm">
+                    <span class="font-body-md text-body-md text-on-surface">API Status</span>
+                    <div class="flex items-center gap-sm">
+                        <span class="relative flex h-2.5 w-2.5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-container opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary-container shadow-[0_0_8px_rgba(0,224,255,0.6)]"></span>
+                        </span>
+                        <span class="font-label-xs text-label-xs text-primary-container uppercase">Operational</span>
+                    </div>
+                </div>
+                <div class="mt-md flex flex-col gap-sm bg-surface-container-low border border-outline-variant rounded-lg p-md shadow-sm mt-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-body-md text-sm text-on-surface-variant">Latency</span>
+                        <span class="font-code-sm text-code-sm text-on-surface">42ms</span>
+                    </div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-body-md text-sm text-on-surface-variant">Model</span>
+                        <span class="font-code-sm text-code-sm text-on-surface">v2.4-travel-opt</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="font-body-md text-sm text-on-surface-variant">Tokens/sec</span>
+                        <span class="font-code-sm text-code-sm text-on-surface">~850</span>
+                    </div>
+                </div>
+            </div>
             
+            <!-- Decorative element -->
+            <div class="bg-surface-container border border-outline-variant rounded-xl overflow-hidden h-48 relative flex items-center justify-center group shadow-sm w-full">
+                <div class="absolute inset-0 bg-surface-container-low z-0"></div>
+                <div class="absolute inset-0 bg-cover bg-center opacity-20 mix-blend-screen z-10" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAeednc7ObbieY_o6CuEqiOago1uCzXnioCYk7HQjE_xlpcGOEGoPXpNlyKiD7dV9Zj-U8kc8tF0WiUsfoSsMwRFZiD4bsJczbyr-yf74YrACtdaX18pRIDFf4qmPFMPA-9rxkla8JtHZWx94mPXqh2OTADlIC8gH4n4gtjMNsPED3Eb7wHlbopTz2d7cHekpY1hQ9sgioFJ10PEPuIRQxzVb7z5g4tDnYQt4nwMCfqFB3SHcB-bOIAjw')"></div>
+                <div class="relative z-20 flex flex-col items-center gap-sm text-on-surface">
+                    <span class="material-symbols-outlined text-primary-container opacity-80 mb-2" style="font-size: 32px;">hub</span>
+                    <span class="font-code-sm text-xs tracking-widest text-primary-container uppercase">Learning Pipeline Active</span>
+                </div>
+            </div>
+        </section>
+        """
+        st.html(html)
+
 class PlannerLayout:
     @staticmethod
     def render_configuration_section():
-        st.html("<h2 class='type-heading' style='margin-top: var(--space-8); margin-bottom: var(--space-4); display: flex; align-items: center; gap: var(--space-2);'><span class='material-symbols-outlined' style='color: var(--color-text-muted);'>tune</span> Configure Request</h2>")
+        st.html("<h2 class='font-headline-md text-headline-md text-on-surface mb-lg flex items-center gap-sm mb-6'><span class='material-symbols-outlined text-on-surface-variant'>tune</span> Configure Request</h2>")
+        
+    @staticmethod
+    def render_interests_mockup():
+        st.html("""
+        <div class="flex flex-col gap-xs w-full mb-4">
+            <label class="font-label-xs text-label-xs text-on-surface mb-1">Interests</label>
+            <div class="w-full bg-surface-container-low border border-outline-variant rounded-lg p-sm min-h-[100px] ai-pulse shadow-sm">
+                <div class="flex flex-wrap gap-sm mb-2">
+                    <span class="inline-flex items-center gap-xs px-sm py-1 border border-outline-variant bg-surface-container text-on-surface rounded-full font-label-xs text-label-xs shadow-sm">History <span class="material-symbols-outlined" style="font-size: 14px;">close</span></span>
+                    <span class="inline-flex items-center gap-xs px-sm py-1 border border-outline-variant bg-surface-container text-on-surface rounded-full font-label-xs text-label-xs shadow-sm">Food <span class="material-symbols-outlined" style="font-size: 14px;">close</span></span>
+                </div>
+                <span class="font-code-sm text-code-sm text-primary-container blinking-cursor">|</span>
+            </div>
+        </div>
+        """)
 
 class ResultLayout:
     @staticmethod
     def render_header(city: str, days: int):
-        components.render_page_header(
-            title=f"{city.title()}",
-            subtitle=f"{days} Days • AI Curated Journey",
-            icon=Icons.MAP,
-            status_badge="Generation Complete"
-        )
+        html = f"""
+        <div class="space-y-[8px] mb-8">
+            <div class="flex items-center gap-[8px] text-primary-fixed-dim mb-2">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                <span class="font-code-sm text-code-sm uppercase tracking-wider text-primary-fixed-dim">Generation Complete</span>
+            </div>
+            <h1 class="font-display-lg text-display-lg text-on-background mb-2">Your requested itinerary is ready.</h1>
+            <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">The LLM has successfully synthesized your preferences into a structured travel plan. You can review the output, analyze generation metrics, or provide feedback to improve future models.</p>
+        </div>
+        
+        <div class="bg-surface-container-low border border-surface-variant rounded-xl overflow-hidden relative group mb-8">
+            <div class="h-48 w-full bg-surface-container-low relative">
+                <div class="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-overlay" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDkIFGG0w5DZHdiVuvXR6T2Cg-vhBbL8wwTM1PSfbMM781FwhDZlZm1Oz-Lx_6PKhWrjqmIcjOsc97iw1J2oXAxiV4CliyJZkF4tFT_u5-UDICCIb84f9k3WOeVPLy43nP5fAPS0G5Xq0LH1T_lN8z6lppWVBWeewta75TL6PzdC6TgRIS06aDxjiIqXCFKIgM2OHj0uVpGicYipDxNxz1He09h1e1MYlIrKgbmeqAZlSlOh1GmYta4_g')"></div>
+                <div class="absolute inset-0 bg-background/50"></div>
+                <div class="absolute bottom-[16px] left-[16px] right-[16px] flex justify-between items-end">
+                    <div>
+                        <h2 class="font-display-lg-mobile text-display-lg-mobile text-on-background mb-1">{city.title()}</h2>
+                        <p class="font-code-sm text-code-sm text-on-surface-variant">{days} Days • Cultural Immersion • Moderate Pace</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        """
+        st.html(textwrap.dedent(html))

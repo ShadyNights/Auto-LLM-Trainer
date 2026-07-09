@@ -101,32 +101,51 @@ try:
     SidebarLayout.render(st.session_state.conversation_id, warnings)
 
     # ==================== MAIN CONTENT (DASHBOARD LAYER) ====================
-    DashboardLayout.render_hero()
+    # The new DashboardLayout contains the exact Tailwind grids for Hero and Metrics
+    st.html("<div class='max-w-[1280px] mx-auto px-[16px] md:px-[24px] py-[32px] space-y-[32px]'>")
     
-    # Load and Render Dashboard Metrics
-    try:
-        with db.get_cursor(commit_on_success=False) as cur:
-            cur.execute("SELECT * FROM dashboard_metrics")
-            metrics = cur.fetchone()
-            if metrics:
-                DashboardLayout.render_metrics(metrics)
-    except Exception:
-        pass # Metrics fallback silent for UI
+    col_main, col_sidebar = st.columns([2, 1], gap="large")
+    
+    with col_main:
+        DashboardLayout.render_hero()
+        
+        try:
+            with db.get_cursor(commit_on_success=False) as cur:
+                cur.execute("SELECT * FROM dashboard_metrics")
+                metrics = cur.fetchone()
+                if metrics:
+                    DashboardLayout.render_metrics(metrics)
+        except Exception:
+            pass # Metrics fallback silent for UI
 
-    # ==================== PLANNER LAYER ====================
-    with st.container():
+        # ==================== PLANNER LAYER ====================
+        st.html("<div class='bg-surface-container border border-outline-variant rounded-xl p-xl shadow-sm'>")
         PlannerLayout.render_configuration_section()
-        with st.form("travel_form"):
+        
+        with st.form("travel_form", clear_on_submit=False, border=False):
+            st.html("<h3 class='font-label-xs text-label-xs text-on-surface-variant uppercase tracking-wider border-b border-outline-variant pb-xs mb-4'>Trip Basics</h3>")
+            
             col_a, col_b = st.columns(2)
             with col_a:
-                city = st.text_input("Destination City", max_chars=50, placeholder="e.g. Kyoto, Japan")
-                days = st.number_input("Travel Duration (Days)", min_value=1, max_value=14, value=5)
+                city = st.text_input("Destination City", max_chars=50, placeholder="e.g. Kyoto, Japan", value="Kyoto, Japan")
             with col_b:
-                interests = st.text_input("Core Interests", placeholder="e.g. History, Food, Hiking")
-                budget = st.selectbox("Budget Profile", ["Budget", "Moderate", "Luxury"])
+                days = st.number_input("Travel Duration (Days)", min_value=1, max_value=14, value=5)
                 
-            st.markdown("<hr style='margin: var(--space-4) 0;'/>", unsafe_allow_html=True)
-            submitted = st.form_submit_button("Generate Premium Itinerary", type="primary")
+            st.html("<div style='margin-bottom: var(--space-6);'></div>")
+            st.html("<h3 class='font-label-xs text-label-xs text-on-surface-variant uppercase tracking-wider border-b border-outline-variant pb-xs mb-4'>Preferences</h3>")
+            
+            PlannerLayout.render_interests_mockup()
+            interests = st.text_input("Core Interests (Fallback)", placeholder="Type interests here", label_visibility="collapsed")
+            budget = st.radio("Budget Profile", ["Budget", "Moderate", "Luxury"], horizontal=True, index=1)
+                
+            st.html("<div class='mt-md pt-md border-t border-outline-variant'></div>")
+            submitted = st.form_submit_button("Generate Premium Itinerary", type="primary", use_container_width=True)
+        st.html("</div>")
+
+    with col_sidebar:
+        DashboardLayout.render_system_status()
+        
+    st.html("</div>")
 
     # ==================== GENERATION LAYER ====================
     if submitted:
@@ -167,24 +186,70 @@ try:
 
     # ==================== RESULTS LAYER ====================
     if "itinerary" in st.session_state and not submitted:
-        st.markdown("<br/>", unsafe_allow_html=True)
-        st.markdown("<hr style='margin-bottom: var(--space-6);'/>", unsafe_allow_html=True)
+        st.html("<div class='max-w-[1280px] mx-auto px-[16px] md:px-[24px] py-[32px] space-y-[32px] animate-fade-in pt-[8px]'>")
         
         ResultLayout.render_header("Kyoto, Japan", 5) # Placeholder values until state holds request data
+        
+        st.html("""
+        <div class="border-b border-outline-variant mb-6">
+            <nav aria-label="Tabs" class="flex gap-[8px] px-[8px]">
+                <button class="font-body-md text-body-md font-medium text-primary-fixed-dim bg-surface-container-high rounded-t-lg px-[16px] py-[8px] transition-colors">Itinerary</button>
+                <button class="font-body-md text-body-md font-medium text-on-surface-variant hover:text-on-background hover:bg-surface-container rounded-t-lg px-[16px] py-[8px] transition-colors">Analytics</button>
+                <button class="font-body-md text-body-md font-medium text-on-surface-variant hover:text-on-background hover:bg-surface-container rounded-t-lg px-[16px] py-[8px] transition-colors">Feedback</button>
+            </nav>
+        </div>
+        """)
         
         tab1, tab2, tab3 = st.tabs(["📝 Itinerary", "⚙️ Analytics", "⭐ Feedback"])
         
         with tab1:
-            render_card("Generated Output", st.session_state.itinerary)
-            render_ai_card("AI Note", "This itinerary was dynamically tailored based on your historical preferences.", "suggestion")
+            st.html("""
+            <div class="p-[24px] space-y-[40px] bg-background">
+                <!-- Day 1 -->
+                <div class="relative pl-[32px] border-l border-outline-variant">
+                    <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-primary-container ring-4 ring-background border border-primary-fixed"></div>
+                    <h3 class="font-headline-md text-headline-md text-primary-fixed-dim mb-[8px]">AI Generated Itinerary</h3>
+                    <p class="font-body-md text-body-md text-on-surface-variant mb-[24px]">Synthesized based on your preferences.</p>
+                    
+                    <div class="space-y-[16px]">
+                        <div class="bg-surface-container rounded-lg p-[16px] flex gap-[16px] border border-surface-variant shadow-sm">
+                            <div class="mt-1 text-on-surface-variant">
+                                <span class="material-symbols-outlined">auto_awesome</span>
+                            </div>
+                            <div class="w-full">
+            """)
+            st.markdown(st.session_state.itinerary)
+            st.html("""
+                            </div>
+                        </div>
+                        
+                        <!-- AI Suggestion Item -->
+                        <div class="bg-surface-container-low border border-primary-fixed-dim/30 rounded-lg p-[16px] relative overflow-hidden shadow-sm mt-4">
+                            <div class="flex gap-[16px] relative z-10">
+                                <div class="mt-1 text-primary-fixed-dim">
+                                    <span class="material-symbols-outlined">psychology</span>
+                                </div>
+                                <div>
+                                    <div class="font-body-md text-body-md font-semibold text-on-background flex items-center gap-[8px]">
+                                        Dynamic Tailoring
+                                        <span class="bg-primary-container text-on-primary-container font-label-xs text-label-xs px-2 py-0.5 rounded-full uppercase tracking-wider">AI Note</span>
+                                    </div>
+                                    <p class="font-body-md text-body-md text-on-surface-variant mt-2 blinking-cursor">This itinerary was dynamically tailored based on your historical preferences and active learning pipeline state.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            """)
             
         with tab2:
             render_card("Pipeline Analytics", f"Itinerary ID: {st.session_state.itinerary_id}\nCorrelation ID: {st.session_state.corr_id}")
             
         with tab3:
             with st.container():
-                st.markdown("<div class='surface' style='padding: var(--space-4);'>", unsafe_allow_html=True)
-                st.markdown("<h3 class='type-title'>Rate this Generation</h3>", unsafe_allow_html=True)
+                st.markdown("<div class='bg-surface-container border border-outline-variant rounded-xl p-xl shadow-sm'>", unsafe_allow_html=True)
+                st.markdown("<h3 class='font-headline-md text-headline-md text-on-surface mb-lg flex items-center gap-sm'>Rate this Generation</h3>", unsafe_allow_html=True)
                 with st.form("feedback_form"):
                     rating = st.radio("Quality Rating", [5, 4, 3, 2, 1], horizontal=True)
                     comments = st.text_area("Optional Comments")
@@ -195,6 +260,8 @@ try:
                         event_service.log_feedback(st.session_state.conversation_id, st.session_state.corr_id, rating, comments)
                         st.success("✅ Feedback securely recorded and queued for pipeline processing.")
                 st.markdown("</div>", unsafe_allow_html=True)
+                
+        st.html("</div>")
 
 except TravelerException as te:
     logger.error("Domain exception occurred", exc_info=True, extra={"status": "failed"})

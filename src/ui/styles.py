@@ -1,33 +1,126 @@
 import streamlit as st
 from src.ui.design import tokens, themes, typography, elevation, motion
 
-def _generate_css_variables() -> str:
-    """Compiles the Python design tokens into CSS custom properties."""
-    css_vars = []
-    
-    # 1. Semantic Colors
-    for key, value in themes.dark_theme.items():
-        css_name = f"--{key.replace('.', '-')}"
-        css_vars.append(f"        {css_name}: {value};")
-        
-    # 2. Spacing
-    for key, value in tokens.spacing.items():
-        css_vars.append(f"        --space-{key}: {value};")
-        
-    # 3. Radius
-    for key, value in tokens.radius.items():
-        css_vars.append(f"        --radius-{key}: {value};")
-        
-    # 4. Motion
-    for key, value in motion.principles.items():
-        if key != "loading":
-            css_vars.append(f"        --motion-{key}: {value};")
-
-    return "\n".join(css_vars)
-
-
-def get_global_css() -> str:
-    """Generates the unified Design System CSS with Aggressive Native Overrides."""
+    # Tailwind script injection
+    html = """
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#006877",
+                        "outline": "#859397",
+                        "surface-container-highest": "#2d3449",
+                        "on-tertiary-fixed": "#251a00",
+                        "on-secondary": "#263143",
+                        "on-tertiary": "#3f2e00",
+                        "surface-container-low": "#131b2e",
+                        "secondary-container": "#3e495d",
+                        "tertiary-container": "#fec42e",
+                        "primary-fixed": "#a5eeff",
+                        "surface-tint": "#00daf8",
+                        "surface-container-high": "#222a3d",
+                        "inverse-on-surface": "#283044",
+                        "inverse-surface": "#dae2fd",
+                        "on-surface": "#dae2fd",
+                        "on-tertiary-fixed-variant": "#5b4300",
+                        "tertiary-fixed": "#ffdf9d",
+                        "surface-variant": "#2d3449",
+                        "surface-container": "#171f33",
+                        "on-background": "#dae2fd",
+                        "tertiary": "#ffe6b6",
+                        "primary": "#baf2ff",
+                        "surface-bright": "#31394d",
+                        "secondary-fixed-dim": "#bcc7de",
+                        "on-tertiary-container": "#6f5200",
+                        "on-primary-container": "#005f6d",
+                        "on-error": "#690005",
+                        "on-error-container": "#ffdad6",
+                        "surface-dim": "#0b1326",
+                        "error-container": "#93000a",
+                        "on-primary-fixed": "#001f25",
+                        "secondary-fixed": "#d8e3fb",
+                        "primary-container": "#00e0ff",
+                        "outline-variant": "#3b494c",
+                        "on-surface-variant": "#bac9cd",
+                        "on-secondary-container": "#aeb9d0",
+                        "tertiary-fixed-dim": "#f7be27",
+                        "surface": "#0b1326",
+                        "on-primary-fixed-variant": "#004e5a",
+                        "on-secondary-fixed-variant": "#3c475a",
+                        "background": "#0b1326",
+                        "on-secondary-fixed": "#111c2d",
+                        "on-primary": "#00363f",
+                        "primary-fixed-dim": "#00daf8",
+                        "secondary": "#bcc7de",
+                        "surface-container-lowest": "#060e20",
+                        "error": "#ffb4ab"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "xs": "0.25rem",
+                        "lg": "1.5rem",
+                        "md": "1rem",
+                        "container-max": "1440px",
+                        "xl": "2.5rem",
+                        "sm": "0.5rem",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Geist"],
+                        "display-lg-mobile": ["Space Grotesk"],
+                        "display-lg": ["Space Grotesk"],
+                        "headline-md": ["Geist"],
+                        "label-xs": ["Geist"],
+                        "code-sm": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "display-lg-mobile": ["32px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "label-xs": ["12px", { "lineHeight": "1.0", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "code-sm": ["13px", { "lineHeight": "1.5", "fontWeight": "400" }]
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        .ai-pulse {
+            animation: pulse-border 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse-border {
+            0%, 100% { border-color: rgba(0, 224, 255, 0.2); box-shadow: 0 0 8px rgba(0, 224, 255, 0.05); }
+            50% { border-color: rgba(0, 224, 255, 0.6); box-shadow: 0 0 12px rgba(0, 224, 255, 0.15); }
+        }
+        .blinking-cursor::after {
+            content: '█';
+            animation: blink 1s step-end infinite;
+            color: #00daf8;
+            margin-left: 4px;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        .skeleton-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+    </style>
+    """
+    st.components.v1.html(html, height=0)
     
     css = f"""
 <style>
