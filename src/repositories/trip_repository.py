@@ -6,6 +6,14 @@ class TripRepository:
     def __init__(self, db: DatabaseConnection):
         self.db = db
 
+    def create_trip(self, destination: str, duration: int, budget_level: str, travel_style: list, interests: list) -> int:
+        with self.db.get_cursor() as cur:
+            cur.execute("""
+                INSERT INTO trips (destination, duration, budget_level, travel_style, interests)
+                VALUES (%s, %s, %s, %s, %s) RETURNING id
+            """, (destination, duration, budget_level, travel_style, interests))
+            return cur.fetchone()['id']
+
     def get_trip_summary(self, itinerary_id: int) -> Optional[TripSummaryDTO]:
         try:
             with self.db.get_cursor() as cur:

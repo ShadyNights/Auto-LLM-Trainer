@@ -30,12 +30,14 @@ def generate_test_data(num_itineraries=50):
     if os.getenv("DB_PASSWORD"): os.environ["PGPASSWORD"] = os.getenv("DB_PASSWORD")
     
     print(f"Initializing services to generate {num_itineraries} test itineraries...")
+    from src.repositories.trip_repository import TripRepository
     db = DatabaseConnection()
     config_repo = ConfigRepository(db)
     prompt_repo = PromptRepository()
     event_repo = EventRepository(db)
     training_repo = TrainingRepository(db)
     itinerary_repo = ItineraryRepository(db)
+    trip_repo = TripRepository(db)
     
     try:
         provider = GroqProvider()
@@ -63,18 +65,25 @@ def generate_test_data(num_itineraries=50):
         corr_id = event_service.log_prompt_submitted(conversation_id, city, budget, days)
         
         try:
-            # 1. Request LLM
+            # 1. Create Trip Record
+            trip_id = trip_repo.create_trip(city, days, budget, [travel_style], interests)
+            
+            # 2. Request LLM
+            start_t = time.time()
             req = ItineraryRequest(city=city, budget=budget, trip_days=days, interests=interests, travel_style=[travel_style])
             response, config, p_ver, d_ver = planner_service.generate_itinerary(req)
+            gen_time_ms = int((time.time() - start_t) * 1000)
             
-            # 2. Save to DB
+            # 3. Save to DB
             itin_id = itinerary_repo.create_itinerary(
                 conversation_id=conversation_id,
                 itinerary_text=response.text,
                 prompt_id=config.active_prompt_id,
                 model_version_id=config.active_model_id,
                 config_snapshot={"temperature": 0.7, "max_tokens": 2000, "provider": "Groq"},
-                word_count=len(response.text.split())
+                word_count=len(response.text.split()),
+                trip_id=trip_id,
+                generation_time_ms=gen_time_ms
             )
             
             # 3. Enqueue for training

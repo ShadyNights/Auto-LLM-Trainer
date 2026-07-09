@@ -11,12 +11,19 @@ def render_trip_summary_view(repo: TripRepository):
     
     active_id = DashboardState.get_active_itinerary_id()
     if not active_id:
-        render_empty_state(
-            title="No Active Trip",
-            description="Generate a trip from the dashboard first to see the summary.",
-            icon="explore"
-        )
-        return
+        # Fallback to the latest itinerary in the database
+        with repo.db.get_cursor() as cur:
+            cur.execute("SELECT id FROM itineraries ORDER BY created_at DESC LIMIT 1")
+            row = cur.fetchone()
+            if row:
+                active_id = row['id']
+            else:
+                render_empty_state(
+                    title="No Active Trip",
+                    description="Generate a trip from the dashboard first to see the summary.",
+                    icon="explore"
+                )
+                return
         
     summary = repo.get_trip_summary(active_id)
     if not summary:

@@ -147,15 +147,26 @@ try:
                 render_processing_state()
                 
                 try:
-                    response, config, p_ver, d_ver = planner_service.generate_itinerary(req)
+                    # 1. Create Trip
+                    import time
+                    start_t = time.time()
+                    trip_repo = TripRepository(db)
+                    trip_id = trip_repo.create_trip(city_clean, days, budget, [travel_style], interest_list)
                     
+                    # 2. Generate LLM
+                    response, config, p_ver, d_ver = planner_service.generate_itinerary(req)
+                    gen_time_ms = int((time.time() - start_t) * 1000)
+                    
+                    # 3. Save to DB
                     itin_id = itinerary_repo.create_itinerary(
                         conversation_id=st.session_state.conversation_id,
                         itinerary_text=response.text,
                         prompt_id=config.active_prompt_id,
                         model_version_id=config.active_model_id,
                         config_snapshot={"temperature": 0.7, "max_tokens": 2000, "provider": "Groq"},
-                        word_count=len(response.text.split())
+                        word_count=len(response.text.split()),
+                        trip_id=trip_id,
+                        generation_time_ms=gen_time_ms
                     )
                     
                     training_repo.enqueue(itin_id)
