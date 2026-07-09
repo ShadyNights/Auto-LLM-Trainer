@@ -1,60 +1,68 @@
 import argparse
-import sys
 import logging
+import sys
+
 from src.infrastructure.database.connection import DatabaseConnection
-from src.repositories.training_repository import TrainingRepository
 from src.pipelines.learning_pipeline import (
-    LearningPipeline, CollectStage, DatasetStage, 
-    EvaluationStage, PromotionStage, CleanupStage
+    CleanupStage,
+    CollectStage,
+    DatasetStage,
+    EvaluationStage,
+    LearningPipeline,
+    PromotionStage,
 )
+from src.repositories.training_repository import TrainingRepository
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("background_jobs")
+
 
 def run_train():
     logger.info("Starting Dataset Builder (train) job")
     db = DatabaseConnection()
     training_repo = TrainingRepository(db)
-    
+
     # In a real distributed system, we would just run Collect + Dataset
-    pipeline = LearningPipeline([
-        CollectStage(training_repo),
-        DatasetStage()
-    ])
+    pipeline = LearningPipeline([CollectStage(training_repo), DatasetStage()])
     pipeline.run()
+
 
 def run_evaluate():
     logger.info("Starting Evaluation job")
     # In reality, this would evaluate a built dataset/model version
-    pipeline = LearningPipeline([
-        EvaluationStage()
-    ])
+    pipeline = LearningPipeline([EvaluationStage()])
     pipeline.run()
+
 
 def run_promote():
     logger.info("Starting Promotion job")
     db = DatabaseConnection()
     training_repo = TrainingRepository(db)
-    
+
     # We might run the full pipeline in a single script for simplicity, or just Promote + Cleanup
-    pipeline = LearningPipeline([
-        PromotionStage(),
-        CleanupStage(training_repo)
-    ])
+    pipeline = LearningPipeline([PromotionStage(), CleanupStage(training_repo)])
     pipeline.run()
 
+
 import os
+
 from dotenv import load_dotenv
+
 
 def main():
     load_dotenv()
-    
+
     # Map local DB vars to PG env vars expected by connection
-    if os.getenv("DB_HOST"): os.environ["PGHOST"] = os.getenv("DB_HOST")
-    if os.getenv("DB_PORT"): os.environ["PGPORT"] = os.getenv("DB_PORT")
-    if os.getenv("DB_NAME"): os.environ["PGDATABASE"] = os.getenv("DB_NAME")
-    if os.getenv("DB_USER"): os.environ["PGUSER"] = os.getenv("DB_USER")
-    if os.getenv("DB_PASSWORD"): os.environ["PGPASSWORD"] = os.getenv("DB_PASSWORD")
+    if os.getenv("DB_HOST"):
+        os.environ["PGHOST"] = os.getenv("DB_HOST")
+    if os.getenv("DB_PORT"):
+        os.environ["PGPORT"] = os.getenv("DB_PORT")
+    if os.getenv("DB_NAME"):
+        os.environ["PGDATABASE"] = os.getenv("DB_NAME")
+    if os.getenv("DB_USER"):
+        os.environ["PGUSER"] = os.getenv("DB_USER")
+    if os.getenv("DB_PASSWORD"):
+        os.environ["PGPASSWORD"] = os.getenv("DB_PASSWORD")
 
     parser = argparse.ArgumentParser(description="Background Jobs CLI for Traveler LLM")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -76,17 +84,20 @@ def main():
         elif args.command == "pipeline":
             db = DatabaseConnection()
             training_repo = TrainingRepository(db)
-            pipeline = LearningPipeline([
-                CollectStage(training_repo),
-                DatasetStage(),
-                EvaluationStage(),
-                PromotionStage(),
-                CleanupStage(training_repo)
-            ])
+            pipeline = LearningPipeline(
+                [
+                    CollectStage(training_repo),
+                    DatasetStage(),
+                    EvaluationStage(),
+                    PromotionStage(),
+                    CleanupStage(training_repo),
+                ]
+            )
             pipeline.run()
     except Exception as e:
         logger.error(f"Job execution failed: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

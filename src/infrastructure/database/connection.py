@@ -1,15 +1,16 @@
 import os
+from contextlib import contextmanager
+
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from contextlib import contextmanager
-from typing import Optional
+
 
 class DatabaseConnection:
     _instance = None
 
     def __new__(cls):
         if cls._instance is None:
-            cls._instance = super(DatabaseConnection, cls).__new__(cls)
+            cls._instance = super().__new__(cls)
             cls._instance.connection = None
         return cls._instance
 

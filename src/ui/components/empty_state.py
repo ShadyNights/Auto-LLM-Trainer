@@ -1,5 +1,7 @@
-import streamlit as st
 import textwrap
+
+import streamlit as st
+
 
 def render_empty_state(title: str, description: str, icon: str = "info", action_label: str = None) -> None:
     """Renders a beautiful empty state indicator."""
@@ -10,6 +12,6 @@ def render_empty_state(title: str, description: str, icon: str = "info", action_
         <p>{description}</p>
     </div>
     """
-    st.markdown(textwrap.dedent(html).replace('\n', ''), unsafe_allow_html=True)
+    st.markdown(textwrap.dedent(html).replace("\n", ""), unsafe_allow_html=True)
     if action_label:
         st.button(action_label, use_container_width=True)

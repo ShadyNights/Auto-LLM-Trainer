@@ -1,14 +1,16 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Dict, Any, Optional
+from typing import Any
+
 
 @dataclass
 class ProviderRequest:
     prompt: str
     temperature: float = 0.7
     max_tokens: int = 1000
-    system_prompt: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    system_prompt: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+
 
 @dataclass
 class ProviderResponse:
@@ -19,6 +21,7 @@ class ProviderResponse:
     total_tokens: int
     finish_reason: str
     estimated_cost: float = 0.0
+
 
 class ProviderInterface(ABC):
     @abstractmethod

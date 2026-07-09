@@ -1,5 +1,7 @@
-import streamlit as st
 import textwrap
+
+import streamlit as st
+
 
 def render_card(content_html: str, variant: str = "default") -> None:
     """Renders a standard surface card."""
@@ -8,4 +10,4 @@ def render_card(content_html: str, variant: str = "default") -> None:
         {content_html}
     </div>
     """
-    st.markdown(textwrap.dedent(html).replace('\n', ''), unsafe_allow_html=True)
+    st.markdown(textwrap.dedent(html).replace("\n", ""), unsafe_allow_html=True)

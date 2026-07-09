@@ -1,0 +1,21 @@
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+# E: pycodestyle
+# F: Pyflakes (detects unused imports, variables, etc)
+# UP: pyupgrade
+# I: isort (sorts imports)
+select = ["E", "F", "UP", "I"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-ra -q --cov=src"
+testpaths = [
+    "tests",
+]
+
+[tool.black]
+line-length = 120
+target-version = ['py310']

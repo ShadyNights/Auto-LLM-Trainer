@@ -1,24 +1,25 @@
 from dataclasses import dataclass
-from typing import List, Dict, Any, Optional
 from datetime import datetime
+
 
 @dataclass
 class TripSummaryDTO:
     destination: str
     duration: int
     budget: str
-    travel_style: List[str]
-    interests: List[str]
+    travel_style: list[str]
+    interests: list[str]
     trip_complexity: int
-    generation_time_ms: Optional[int]
+    generation_time_ms: int | None
     itinerary_text: str
     provider: str
     prompt_version: str
     model_version: str
     conversation_id: int
     created_at: datetime
-    quality_score: Optional[float]
-    rating: Optional[int]
+    quality_score: float | None
+    rating: int | None
+
 
 @dataclass
 class AIOverviewDTO:
@@ -35,21 +36,25 @@ class AIOverviewDTO:
     promotions: int
     evaluations: int
 
+
 @dataclass
 class DestinationStat:
     destination: str
     count: int
     avg_rating: float
 
+
 @dataclass
 class RatingStat:
     rating: int
     count: int
 
+
 @dataclass
 class BudgetStat:
     budget_level: str
     count: int
+
 
 @dataclass
 class PipelineStat:
@@ -57,11 +62,12 @@ class PipelineStat:
     total_prompts: int
     total_models: int
 
+
 @dataclass
 class AnalyticsDTO:
     recent_conversations: int
     recent_generations: int
-    destinations: List[DestinationStat]
-    ratings: List[RatingStat]
-    budgets: List[BudgetStat]
+    destinations: list[DestinationStat]
+    ratings: list[RatingStat]
+    budgets: list[BudgetStat]
     pipeline: PipelineStat

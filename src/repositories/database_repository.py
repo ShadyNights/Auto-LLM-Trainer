@@ -1,7 +1,8 @@
 import pandas as pd
-from typing import Optional
-from src.infrastructure.database.connection import DatabaseConnection
+
 from src.domain.enums.table_type import TableType
+from src.infrastructure.database.connection import DatabaseConnection
+
 
 class DatabaseRepository:
     def __init__(self, db: DatabaseConnection):
@@ -12,7 +13,7 @@ class DatabaseRepository:
         try:
             # TableType enum ensures the table name is safe and whitelisted.
             query = f"SELECT * FROM {table.value} ORDER BY id DESC LIMIT %s"
-            
+
             with self.db.get_cursor() as cur:
                 cur.execute(query, (limit,))
                 rows = cur.fetchall()
@@ -28,6 +29,6 @@ class DatabaseRepository:
             with self.db.get_cursor() as cur:
                 cur.execute(f"SELECT COUNT(*) as cnt FROM {table.value}")
                 row = cur.fetchone()
-                return row['cnt'] if row else 0
+                return row["cnt"] if row else 0
         except Exception:
             return 0

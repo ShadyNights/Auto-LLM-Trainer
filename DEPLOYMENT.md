@@ -69,7 +69,7 @@ Because Traveler LLM utilizes a Continuous Feedback Learning Pipeline (`backgrou
 ### Option A: GitHub Actions (Recommended / Free)
 You can schedule the pipeline to run periodically using a GitHub Actions Cron workflow.
 
-1. Create `.github/workflows/pipeline.yml`:
+1. Create `.github/workflows/ml-pipeline.yml`:
 ```yaml
 name: Learning Pipeline
 on:
@@ -89,11 +89,11 @@ jobs:
       - name: Execute Pipeline
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_NAME: ${{ secrets.DB_NAME }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DB_PORT: "5432"
+          PGHOST: ${{ secrets.PGHOST }}
+          PGDATABASE: ${{ secrets.PGDATABASE }}
+          PGUSER: ${{ secrets.PGUSER }}
+          PGPASSWORD: ${{ secrets.PGPASSWORD }}
+          PGPORT: "5432"
         run: python background_jobs.py pipeline
 ```
 2. Add your secrets to your GitHub Repository Settings (Settings > Secrets and variables > Actions).

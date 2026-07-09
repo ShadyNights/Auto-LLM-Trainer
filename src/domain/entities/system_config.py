@@ -1,6 +1,6 @@
 from dataclasses import dataclass
-from typing import Optional, Dict, Any
 from datetime import datetime
+
 
 @dataclass
 class SystemConfig:
@@ -9,7 +9,7 @@ class SystemConfig:
     active_model_id: int
     active_prompt_id: int
     active_dataset_id: int
-    retry_schedule: Dict[str, int]
+    retry_schedule: dict[str, int]
     learning_enabled: bool
     evaluation_enabled: bool
     exports_enabled: bool

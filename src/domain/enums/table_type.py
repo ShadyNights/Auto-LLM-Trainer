@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class TableType(Enum):
     ITINERARIES = "itineraries"
     CONVERSATIONS = "conversations"

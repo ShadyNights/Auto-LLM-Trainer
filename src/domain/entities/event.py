@@ -1,14 +1,15 @@
 from dataclasses import dataclass
-from typing import Optional, Dict, Any
 from datetime import datetime
+from typing import Any
+
 
 @dataclass
 class Event:
-    id: Optional[int]
+    id: int | None
     conversation_id: int
     correlation_id: str
     event_type: str
     occurred_at: datetime
     actor: str
-    payload: Dict[str, Any]
+    payload: dict[str, Any]
     version: str = "1.0"
