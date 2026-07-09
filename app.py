@@ -1,6 +1,6 @@
 """
 Production-Ready AI Travel Planner with Self-Training LLM System
-Version: 5.2.0 (Design System Architecture Migration)
+Version: 5.1.0 (UI/UX Redesign)
 """
 
 import os
@@ -22,17 +22,17 @@ from src.domain.dto.itinerary_request import ItineraryRequest
 from src.domain.exceptions import TravelerException
 from src.infrastructure.logging.json_logger import get_json_logger
 
-# UI Design System
+# UI Components
 from src.ui.styles import inject_styles
-from src.ui.layouts import BaseLayout, SidebarLayout, DashboardLayout, PlannerLayout, ResultLayout
-from src.ui.components import render_badge, render_card, render_ai_card, render_empty_state
-from src.ui.icons import Icons
+from src.ui.components import (
+    render_hero, render_metric, render_empty_state, 
+    render_badge, render_page_section, render_skeleton_loader, render_card
+)
 
 load_dotenv(override=True)
 logger = get_json_logger(__name__)
 
-# Initialize layout constraints and dependencies
-BaseLayout.setup_page("Traveler LLM Dashboard")
+st.set_page_config(page_title="Traveler LLM", page_icon="✈️", layout="wide")
 inject_styles()
 
 try:
@@ -98,56 +98,78 @@ try:
         return re.sub(r'[^a-zA-Z\s-]', '', city.strip())[:50]
 
     # ==================== SIDEBAR ====================
-    SidebarLayout.render(st.session_state.conversation_id, warnings)
-
-    # ==================== MAIN CONTENT (DASHBOARD LAYER) ====================
-    # The new DashboardLayout contains the exact Tailwind grids for Hero and Metrics
-    st.html("<div class='max-w-[1280px] mx-auto px-[16px] md:px-[24px] py-[32px] space-y-[32px]'>")
-    
-    col_main, col_sidebar = st.columns([2, 1], gap="large")
-    
-    with col_main:
-        DashboardLayout.render_hero()
+    with st.sidebar:
+        # 1. Workspace
+        render_page_section("Workspace", icon="🛠️")
+        st.markdown(f"<p class='text-muted'>Session ID: <code>{st.session_state.conversation_id}</code></p>", unsafe_allow_html=True)
+        st.markdown("<hr/>", unsafe_allow_html=True)
         
+        # 2. Health
+        render_page_section("System Health", icon="⚙️")
+        if warnings:
+            st.markdown(render_badge("Degraded", "warning"), unsafe_allow_html=True)
+            for w in warnings:
+                st.caption(f"⚠️ {w}")
+        else:
+            st.markdown(render_badge("Operational", "success"), unsafe_allow_html=True)
+        st.markdown("<hr/>", unsafe_allow_html=True)
+            
+        # 3. Configuration
+        render_page_section("Configuration", icon="🧠")
+        try:
+            config = config_repo.get_active_config()
+            st.markdown(f"<p class='text-muted' style='margin:0;'>Provider: <b>Groq</b></p>", unsafe_allow_html=True)
+            st.markdown(f"<p class='text-muted' style='margin:0;'>Prompt: <b>v1</b></p>", unsafe_allow_html=True)
+            st.markdown(f"<p class='text-muted' style='margin:0;'>Dataset: <b>ds-v1</b></p>", unsafe_allow_html=True)
+        except:
+            st.markdown(render_badge("Config Error", "error"), unsafe_allow_html=True)
+        st.markdown("<hr/>", unsafe_allow_html=True)
+
+        # 4. Metrics
+        render_page_section("Metrics", icon="📊")
         try:
             with db.get_cursor(commit_on_success=False) as cur:
                 cur.execute("SELECT * FROM dashboard_metrics")
                 metrics = cur.fetchone()
                 if metrics:
-                    DashboardLayout.render_metrics(metrics)
+                    render_metric("Total Conversations", str(metrics.get('total_conversations', 0)))
+                    st.markdown("<br/>", unsafe_allow_html=True)
+                    
+                    rating = metrics.get('average_rating', 0)
+                    rating_str = f"{rating:.1f}" if rating else "N/A"
+                    render_metric("Avg Rating", rating_str, "Stable", "info")
+                    st.markdown("<br/>", unsafe_allow_html=True)
+                    
+                    fails = metrics.get('generation_failures', 0)
+                    fail_trend = "Needs Review" if fails > 0 else "Optimal"
+                    fail_color = "error" if fails > 0 else "success"
+                    render_metric("Gen Failures", str(fails), fail_trend, fail_color)
         except Exception:
-            pass # Metrics fallback silent for UI
+            render_metric("Metrics", "Offline", "DB Error", "error")
 
-        # ==================== PLANNER LAYER ====================
-        st.html("<div class='bg-surface-container border border-outline-variant rounded-xl p-xl shadow-sm'>")
-        PlannerLayout.render_configuration_section()
-        
-        with st.form("travel_form", clear_on_submit=False, border=False):
-            st.html("<h3 class='font-label-xs text-label-xs text-on-surface-variant uppercase tracking-wider border-b border-outline-variant pb-xs mb-4'>Trip Basics</h3>")
-            
+    # ==================== MAIN CONTENT ====================
+    render_hero(
+        title="Traveler LLM", 
+        subtitle="Automated itinerary curation powered by a Continuous Feedback Learning Pipeline.",
+        icon="✈️"
+    )
+
+    # 1. Configuration (Input Form)
+    with st.container():
+        render_page_section("Configure Request", "Set the parameters for your next adventure.")
+        with st.form("travel_form"):
             col_a, col_b = st.columns(2)
             with col_a:
-                city = st.text_input("Destination City", max_chars=50, placeholder="e.g. Kyoto, Japan", value="Kyoto, Japan")
-            with col_b:
+                city = st.text_input("Destination City", max_chars=50, placeholder="e.g. Kyoto, Japan")
                 days = st.number_input("Travel Duration (Days)", min_value=1, max_value=14, value=5)
+            with col_b:
+                interests = st.text_input("Core Interests", placeholder="e.g. History, Food, Hiking")
+                budget = st.selectbox("Budget Profile", ["Budget", "Moderate", "Luxury"])
                 
-            st.html("<div style='margin-bottom: var(--space-6);'></div>")
-            st.html("<h3 class='font-label-xs text-label-xs text-on-surface-variant uppercase tracking-wider border-b border-outline-variant pb-xs mb-4'>Preferences</h3>")
-            
-            PlannerLayout.render_interests_mockup()
-            interests = st.text_input("Core Interests (Fallback)", placeholder="Type interests here", label_visibility="collapsed")
-            budget = st.radio("Budget Profile", ["Budget", "Moderate", "Luxury"], horizontal=True, index=1)
-                
-            st.html("<div class='mt-md pt-md border-t border-outline-variant'></div>")
-            submitted = st.form_submit_button("Generate Premium Itinerary", type="primary", use_container_width=True)
-        st.html("</div>")
+            st.markdown("<hr style='margin-top:8px;'/>", unsafe_allow_html=True)
+            submitted = st.form_submit_button("Generate Premium Itinerary")
 
-    with col_sidebar:
-        DashboardLayout.render_system_status()
-        
-    st.html("</div>")
-
-    # ==================== GENERATION LAYER ====================
+    # 2. Generation Phase
     if submitted:
         city_clean = sanitize_city(city)
         if not city_clean:
@@ -158,7 +180,8 @@ try:
             corr_id = event_service.log_prompt_submitted(st.session_state.conversation_id, city_clean, budget, days)
             
             st.markdown("<br/>", unsafe_allow_html=True)
-            render_ai_card("Synthesizing Request", "Connecting to Language Model Pipeline...", "thinking")
+            render_page_section("Generation in Progress", "The LLM is processing your request...")
+            render_skeleton_loader()
             
             try:
                 response, config, p_ver, d_ver = planner_service.generate_itinerary(req)
@@ -178,90 +201,56 @@ try:
                 st.session_state.itinerary = response.text
                 st.session_state.itinerary_id = itin_id
                 st.session_state.corr_id = corr_id
-                st.rerun() 
+                st.rerun() # Refresh to show results cleanly
                 
             except Exception as e:
                 event_service.log_generation(st.session_state.conversation_id, corr_id, False, str(e))
-                render_ai_card("Generation Failed", str(e), "error")
+                st.error(f"Failed to generate: {e}")
 
-    # ==================== RESULTS LAYER ====================
+    # 3. Result, Analytics & Feedback Flow
     if "itinerary" in st.session_state and not submitted:
-        st.html("<div class='max-w-[1280px] mx-auto px-[16px] md:px-[24px] py-[32px] space-y-[32px] animate-fade-in pt-[8px]'>")
-        
-        ResultLayout.render_header("Kyoto, Japan", 5) # Placeholder values until state holds request data
-        
-        st.html("""
-        <div class="border-b border-outline-variant mb-6">
-            <nav aria-label="Tabs" class="flex gap-[8px] px-[8px]">
-                <button class="font-body-md text-body-md font-medium text-primary-fixed-dim bg-surface-container-high rounded-t-lg px-[16px] py-[8px] transition-colors">Itinerary</button>
-                <button class="font-body-md text-body-md font-medium text-on-surface-variant hover:text-on-background hover:bg-surface-container rounded-t-lg px-[16px] py-[8px] transition-colors">Analytics</button>
-                <button class="font-body-md text-body-md font-medium text-on-surface-variant hover:text-on-background hover:bg-surface-container rounded-t-lg px-[16px] py-[8px] transition-colors">Feedback</button>
-            </nav>
-        </div>
-        """)
+        st.markdown("<br/>", unsafe_allow_html=True)
+        render_page_section("Generated Results", "Your requested itinerary is ready.")
         
         tab1, tab2, tab3 = st.tabs(["📝 Itinerary", "⚙️ Analytics", "⭐ Feedback"])
         
         with tab1:
-            st.html("""
-            <div class="p-[24px] space-y-[40px] bg-background">
-                <!-- Day 1 -->
-                <div class="relative pl-[32px] border-l border-outline-variant">
-                    <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-primary-container ring-4 ring-background border border-primary-fixed"></div>
-                    <h3 class="font-headline-md text-headline-md text-primary-fixed-dim mb-[8px]">AI Generated Itinerary</h3>
-                    <p class="font-body-md text-body-md text-on-surface-variant mb-[24px]">Synthesized based on your preferences.</p>
-                    
-                    <div class="space-y-[16px]">
-                        <div class="bg-surface-container rounded-lg p-[16px] flex gap-[16px] border border-surface-variant shadow-sm">
-                            <div class="mt-1 text-on-surface-variant">
-                                <span class="material-symbols-outlined">auto_awesome</span>
-                            </div>
-                            <div class="w-full">
-            """)
-            st.markdown(st.session_state.itinerary)
-            st.html("""
-                            </div>
-                        </div>
-                        
-                        <!-- AI Suggestion Item -->
-                        <div class="bg-surface-container-low border border-primary-fixed-dim/30 rounded-lg p-[16px] relative overflow-hidden shadow-sm mt-4">
-                            <div class="flex gap-[16px] relative z-10">
-                                <div class="mt-1 text-primary-fixed-dim">
-                                    <span class="material-symbols-outlined">psychology</span>
-                                </div>
-                                <div>
-                                    <div class="font-body-md text-body-md font-semibold text-on-background flex items-center gap-[8px]">
-                                        Dynamic Tailoring
-                                        <span class="bg-primary-container text-on-primary-container font-label-xs text-label-xs px-2 py-0.5 rounded-full uppercase tracking-wider">AI Note</span>
-                                    </div>
-                                    <p class="font-body-md text-body-md text-on-surface-variant mt-2 blinking-cursor">This itinerary was dynamically tailored based on your historical preferences and active learning pipeline state.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            """)
+            render_card(st.session_state.itinerary)
             
         with tab2:
-            render_card("Pipeline Analytics", f"Itinerary ID: {st.session_state.itinerary_id}\nCorrelation ID: {st.session_state.corr_id}")
+            analytics_html = f"""
+            <div class="flex flex-col gap-4">
+                <div>
+                    <p class="text-muted" style="margin:0;">Itinerary ID</p>
+                    <p class="text-primary" style="font-family:monospace; margin:0;">{st.session_state.itinerary_id}</p>
+                </div>
+                <div>
+                    <p class="text-muted" style="margin:0;">Correlation ID</p>
+                    <p class="text-primary" style="font-family:monospace; margin:0;">{st.session_state.corr_id}</p>
+                </div>
+                <div>
+                    <p class="text-muted" style="margin:0;">Status</p>
+                    {render_badge('Pipeline Queued', 'info')}
+                </div>
+            </div>
+            """
+            render_card(analytics_html)
             
         with tab3:
-            with st.container():
-                st.markdown("<div class='bg-surface-container border border-outline-variant rounded-xl p-xl shadow-sm'>", unsafe_allow_html=True)
-                st.markdown("<h3 class='font-headline-md text-headline-md text-on-surface mb-lg flex items-center gap-sm'>Rate this Generation</h3>", unsafe_allow_html=True)
-                with st.form("feedback_form"):
-                    rating = st.radio("Quality Rating", [5, 4, 3, 2, 1], horizontal=True)
-                    comments = st.text_area("Optional Comments")
-                    submit_fb = st.form_submit_button("Submit Feedback", type="primary")
-                    
-                    if submit_fb:
-                        itinerary_repo.update_rating(st.session_state.itinerary_id, rating, comments)
-                        event_service.log_feedback(st.session_state.conversation_id, st.session_state.corr_id, rating, comments)
-                        st.success("✅ Feedback securely recorded and queued for pipeline processing.")
-                st.markdown("</div>", unsafe_allow_html=True)
+            st.markdown("<div class='card'>", unsafe_allow_html=True)
+            st.markdown("#### Rate this Itinerary")
+            st.markdown("<p class='text-secondary'>Your feedback trains the model via the Continuous Feedback Learning Pipeline.</p>", unsafe_allow_html=True)
+            
+            with st.form("feedback_form"):
+                rating = st.radio("Quality Rating", [5, 4, 3, 2, 1], horizontal=True)
+                comments = st.text_area("Optional Comments")
+                submit_fb = st.form_submit_button("Submit Feedback")
                 
-        st.html("</div>")
+                if submit_fb:
+                    itinerary_repo.update_rating(st.session_state.itinerary_id, rating, comments)
+                    event_service.log_feedback(st.session_state.conversation_id, st.session_state.corr_id, rating, comments)
+                    st.success("✅ Feedback securely recorded and queued for pipeline processing.")
+            st.markdown("</div>", unsafe_allow_html=True)
 
 except TravelerException as te:
     logger.error("Domain exception occurred", exc_info=True, extra={"status": "failed"})

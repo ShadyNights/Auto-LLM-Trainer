@@ -1,21 +1,15 @@
 [theme]
-# Primary accent color (Cyan)
-primaryColor = "#00e0ff"
-
-# Deep Space Blue background (from Tailwind background)
-backgroundColor = "#0b1326"
-
-# Lowest Surface background (from Tailwind surface-container-lowest for Sidebar)
-secondaryBackgroundColor = "#060e20"
-
-# Text color (from Tailwind on-background)
-textColor = "#dae2fd"
-
-# Font defaults to sans serif, we will override with Geist in styles.py
+primaryColor = "#667eea"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#f5f7fa"
+textColor = "#262730"
 font = "sans serif"
-
-[client]
-showErrorDetails = false
 
 [server]
 headless = true
+port = 8501
+enableCORS = false
+enableXsrfProtection = true
+
+[browser]
+gatherUsageStats = false

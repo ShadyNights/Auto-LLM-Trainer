@@ -12,14 +12,14 @@ AI interfaces often overwhelm users with complexity, animations, and dense data.
 
 ## 2. Principles
 Every UI decision must be vetted against these core principles:
-1. **Content over decoration**
-2. **Information over effects**
-3. **Motion supports interaction**
-4. **Accessibility by default**
-5. **One visual language**
-6. **Progressive disclosure**
-7. **Consistent rhythm**
-8. **Performance first**
+1. **Content over decoration:** Remove unnecessary borders, extreme glassmorphism, or purely decorative shadows.
+2. **Information over effects:** Gradients and heavy animations distract. Use them sparingly for Primary CTAs or Hero moments.
+3. **Motion supports interaction:** Animation must serve a purpose (e.g., feedback, state changes), never just to "look cool."
+4. **Accessibility by default:** Contrast, focus rings, and screen reader support are non-negotiable baselines, not afterthoughts.
+5. **One visual language:** A card in the Analytics dashboard must share the same genetic makeup as an AI message card.
+6. **Progressive disclosure:** Show only what is necessary right now. Expand on demand.
+7. **Consistent rhythm:** Rely strictly on the 8-pt spacing grid.
+8. **Performance first:** Heavy CSS calculations and complex DOM structures degrade the perceived speed of the AI. Keep it lightweight.
 
 ---
 
