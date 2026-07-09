@@ -103,10 +103,10 @@ try:
         pass
 
     # ==================== SIDEBAR ====================
-    render_sidebar(st.session_state.conversation_id, warnings, config_active, metrics_data)
+    render_sidebar(st.session_state.conversation_id, warnings, config_active)
 
     # ==================== MAIN CONTENT ====================
-    render_hero_dashboard()
+    render_hero_dashboard(metrics_data)
 
     # 1. Configuration (Input Form)
     with st.container():

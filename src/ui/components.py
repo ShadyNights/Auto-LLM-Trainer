@@ -33,9 +33,20 @@ def get_components_css() -> str:
     .c-skeleton--title { height: 24px; width: 40%; margin-bottom: var(--space-md); }
     .c-skeleton--short { height: 16px; width: 60%; margin-top: var(--space-sm); }
     
-    .c-metric { display: flex; flex-direction: column; gap: var(--space-xs); }
-    .c-metric__title { font-family: 'Geist', sans-serif; font-size: var(--text-label); color: var(--c-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
-    .c-metric__value { font-size: var(--text-headline); font-weight: 600; color: var(--c-primary); line-height: 1.1; }
+    .c-metric-card {
+        background-color: var(--c-layer-base);
+        border: 1px solid var(--c-outline-variant);
+        border-radius: var(--radius-xl);
+        padding: var(--space-md);
+        display: flex; flex-direction: column; gap: var(--space-xs);
+        box-shadow: var(--shadow-sm);
+        transition: box-shadow 300ms ease, transform 300ms ease;
+    }
+    .c-metric-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .c-metric-card__header { display: flex; align-items: center; justify-content: space-between; }
+    .c-metric-card__title { font-family: 'Geist', sans-serif; font-size: var(--text-label); color: var(--c-secondary); text-transform: uppercase; letter-spacing: 0.05em; display:flex; align-items:center; gap:4px; }
+    .c-metric-card__value { font-size: var(--text-headline); font-weight: 600; color: var(--c-primary); line-height: 1.1; margin-top: var(--space-xs); }
+    .c-metric-card__context { font-size: var(--text-label); color: var(--c-outline); margin-top: var(--space-xs); }
 
     .c-empty-state {
         text-align: center;
@@ -48,6 +59,11 @@ def get_components_css() -> str:
 
     .c-meta-label { margin: 0; color: var(--c-secondary); }
     .c-meta-value { font-family: monospace; margin: 0; color: var(--c-primary); }
+
+    /* Streamlit Global Overrides (Tables & Inputs) */
+    [data-testid="stTable"], [data-testid="stDataFrame"] { font-family: 'Geist', sans-serif; }
+    [data-testid="stTable"] th, [data-testid="stDataFrame"] th { background-color: var(--c-layer-high) !important; color: var(--c-primary) !important; font-weight: 600 !important; }
+    [data-testid="stTable"] tr:nth-child(even) { background-color: var(--c-layer-low) !important; }
     """
 
 def render_card(content_html: str, active_glow: bool = False, class_name: str = ""):
@@ -59,13 +75,19 @@ def render_card(content_html: str, active_glow: bool = False, class_name: str = 
 def render_badge(text: str, variant: str = "neutral", class_name: str = "") -> str:
     return f'<span class="c-badge c-badge--{variant} {class_name}">{text}</span>'
 
-def render_metric(title: str, value: str, label: Optional[str] = None, variant: str = "neutral"):
-    label_html = render_badge(label, variant=variant) if label else ""
+def render_metric(title: str, value: str, icon: str = "", trend_label: Optional[str] = None, variant: str = "neutral", context: str = ""):
+    trend_html = render_badge(trend_label, variant=variant) if trend_label else ""
+    icon_html = f"<span class='material-symbols-outlined' style='font-size:16px;'>{icon}</span>" if icon else ""
+    context_html = f"<div class='c-metric-card__context'>{context}</div>" if context else ""
+    
     st.markdown(f"""
-    <div class="c-metric">
-        <div class="c-metric__title">{title}</div>
-        <div class="c-metric__value">{value}</div>
-        {label_html}
+    <div class="c-metric-card">
+        <div class="c-metric-card__header">
+            <div class="c-metric-card__title">{icon_html} {title}</div>
+            {trend_html}
+        </div>
+        <div class="c-metric-card__value">{value}</div>
+        {context_html}
     </div>
     """, unsafe_allow_html=True)
 

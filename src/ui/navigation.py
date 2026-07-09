@@ -8,8 +8,7 @@ from .helpers import render_divider
 def render_sidebar(
     session_id: str, 
     warnings: List[str], 
-    config_active: bool,
-    metrics_data: Optional[dict]
+    config_active: bool
 ):
     """Renders the persistent sidebar navigation and contextual panels."""
     with st.sidebar:
@@ -37,8 +36,4 @@ def render_sidebar(
             st.markdown(f"<p class='c-meta-label'>Dataset: <span class='c-meta-value'>ds-v1</span></p>", unsafe_allow_html=True)
         else:
             st.markdown(render_badge("Config Error", "error"), unsafe_allow_html=True)
-        render_divider()
 
-        # 4. Metrics
-        render_section("Metrics", icon="📊")
-        render_kpi_dashboard(metrics_data)

@@ -4,23 +4,29 @@ from .layout import render_section
 
 def render_travel_form() -> Tuple[str, int, str, str, bool]:
     """
-    Renders the main travel configuration form.
+    Renders the main travel configuration form inside an elevated card.
     Returns: (city, days, interests, budget, is_submitted)
     """
-    render_section("Configure Request", "Set the parameters for your next adventure.")
+    st.markdown("<div class='c-card'>", unsafe_allow_html=True)
+    render_section("Configure Request", "Set the parameters for your next adventure.", icon="tune")
     
     with st.form("travel_form"):
         col_a, col_b = st.columns(2)
         with col_a:
             city = st.text_input("Destination City", max_chars=50, placeholder="e.g. Kyoto, Japan")
+            st.caption("City you are traveling to.")
             days = st.number_input("Travel Duration (Days)", min_value=1, max_value=14, value=5)
+            st.caption("Between 1 and 14 days.")
         with col_b:
             interests = st.text_input("Core Interests", placeholder="e.g. History, Food, Hiking")
+            st.caption("Comma-separated topics.")
             budget = st.selectbox("Budget Profile", ["Budget", "Moderate", "Luxury"])
+            st.caption("Select your spending style.")
             
         st.markdown("<hr style='margin-top:8px; border-color:var(--c-outline-variant);'/>", unsafe_allow_html=True)
         submitted = st.form_submit_button("Generate Premium Itinerary")
         
+    st.markdown("</div>", unsafe_allow_html=True)
     return city, days, interests, budget, submitted
 
 def render_search_input(placeholder: str = "Search...") -> str:
