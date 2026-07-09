@@ -15,13 +15,17 @@ class DatabaseConnection:
 
     def connect(self):
         if self.connection is None or self.connection.closed:
-            self.connection = psycopg2.connect(
-                dbname=os.getenv("PGDATABASE", "traveler_db"),
-                user=os.getenv("PGUSER", "postgres"),
-                password=os.getenv("PGPASSWORD", "postgres"),
-                host=os.getenv("PGHOST", "localhost"),
-                port=os.getenv("PGPORT", "5432"),
-            )
+            db_url = os.getenv("DATABASE_URL")
+            if db_url:
+                self.connection = psycopg2.connect(db_url)
+            else:
+                self.connection = psycopg2.connect(
+                    dbname=os.getenv("PGDATABASE", "traveler_db"),
+                    user=os.getenv("PGUSER", "postgres"),
+                    password=os.getenv("PGPASSWORD", "postgres"),
+                    host=os.getenv("PGHOST", "localhost"),
+                    port=os.getenv("PGPORT", "5432"),
+                )
         return self.connection
 
     @contextmanager
