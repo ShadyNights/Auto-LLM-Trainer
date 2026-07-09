@@ -72,7 +72,7 @@ def render_card(content_html: str, active_glow: bool = False, class_name: str = 
     if active_glow: classes.append("c-card--active-glow")
     if class_name: classes.append(class_name)
     html = f'<div class="{" ".join(classes)}">\n{content_html}\n</div>'
-    st.markdown(textwrap.dedent(html), unsafe_allow_html=True)
+    st.markdown(html.replace('\\n', ''), unsafe_allow_html=True)
 
 def render_badge(text: str, variant: str = "neutral", class_name: str = "") -> str:
     return f'<span class="c-badge c-badge--{variant} {class_name}">{text}</span>'
@@ -92,7 +92,7 @@ def render_metric(title: str, value: str, icon: str = "", trend_label: Optional[
     {context_html}
 </div>
     """
-    st.markdown(html, unsafe_allow_html=True)
+    st.markdown(html.replace('\\n', ''), unsafe_allow_html=True)
 
 def render_empty_state(title: str, description: str, icon: str = "block"):
     html = f"""
@@ -102,7 +102,7 @@ def render_empty_state(title: str, description: str, icon: str = "block"):
     <p>{description}</p>
 </div>
     """
-    st.markdown(html, unsafe_allow_html=True)
+    st.markdown(html.replace('\\n', ''), unsafe_allow_html=True)
 
 def render_loading(lines: int = 3):
     lines_html = "".join(['<div class="c-skeleton c-skeleton--line"></div>' for _ in range(lines)])
@@ -113,7 +113,7 @@ def render_loading(lines: int = 3):
     <div class="c-skeleton c-skeleton--short"></div>
 </div>
     """
-    st.markdown(html, unsafe_allow_html=True)
+    st.markdown(html.replace('\\n', ''), unsafe_allow_html=True)
 
 def render_provider_indicator(provider_name: str, status: str = "primary"):
     """Renders a provider indicator badge."""

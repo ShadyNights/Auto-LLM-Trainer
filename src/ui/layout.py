@@ -28,7 +28,7 @@ def render_header(title: str, subtitle: Optional[str] = None, icon: Optional[str
     {subtitle_html}
 </div>
     """
-    st.markdown(html, unsafe_allow_html=True)
+    st.markdown(html.replace('\\n', ''), unsafe_allow_html=True)
 
 def render_section(title: str, subtitle: Optional[str] = None, icon: Optional[str] = None):
     """Renders a standardized section layout."""
