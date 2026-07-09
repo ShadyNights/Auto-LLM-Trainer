@@ -12,6 +12,12 @@ def render_sidebar(
 ):
     """Renders the persistent sidebar navigation and contextual panels."""
     with st.sidebar:
+        # 0. Navigation Routing
+        render_section("Navigation", icon="explore")
+        pages = ["Generator", "Trip Summary", "AI Metrics", "Analytics Dashboard", "Database Manager"]
+        current_page = st.radio("Pages", pages, label_visibility="collapsed")
+        render_divider()
+
         # 1. Workspace
         render_section("Workspace", icon="🛠️")
         st.markdown(f"<p class='c-meta-label'>Session ID</p>", unsafe_allow_html=True)
@@ -36,4 +42,6 @@ def render_sidebar(
             st.markdown(f"<p class='c-meta-label'>Dataset: <span class='c-meta-value'>ds-v1</span></p>", unsafe_allow_html=True)
         else:
             st.markdown(render_badge("Config Error", "error"), unsafe_allow_html=True)
+            
+        return current_page
 

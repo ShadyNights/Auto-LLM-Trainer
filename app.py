@@ -27,6 +27,12 @@ from src.ui.forms import render_travel_form
 from src.ui.dashboard import render_hero_dashboard, render_processing_state, render_results_dashboard
 from src.ui.helpers import sanitize_text
 
+from src.repositories.analytics_repository import AnalyticsRepository
+from src.ui.pages.trip_summary_view import render_trip_summary
+from src.ui.pages.ai_metrics_view import render_ai_metrics
+from src.ui.pages.analytics_view import render_analytics_dashboard
+from src.ui.pages.database_view import render_database_manager
+
 load_dotenv(override=True)
 logger = get_json_logger(__name__)
 
@@ -41,6 +47,7 @@ try:
     event_repo = EventRepository(db)
     training_repo = TrainingRepository(db)
     itinerary_repo = ItineraryRepository(db)
+    analytics_repo = AnalyticsRepository(db)
 
     provider = GroqProvider()
     planner_service = PlannerService(config_repo, prompt_repo, provider)
@@ -103,63 +110,76 @@ try:
         pass
 
     # ==================== SIDEBAR ====================
-    render_sidebar(st.session_state.conversation_id, warnings, config_active)
+    current_page = render_sidebar(st.session_state.conversation_id, warnings, config_active)
 
-    # ==================== MAIN CONTENT ====================
-    render_hero_dashboard(metrics_data)
+    # ==================== MAIN CONTENT (ROUTING) ====================
+    if current_page == "Generator":
+        render_hero_dashboard(metrics_data)
 
-    # 1. Configuration (Input Form)
-    with st.container():
-        city, days, interests, budget, submitted = render_travel_form()
+        # 1. Configuration (Input Form)
+        with st.container():
+            city, days, interests, budget, submitted = render_travel_form()
 
-    # 2. Generation Phase
-    if submitted:
-        city_clean = sanitize_text(city)
-        if not city_clean:
-            st.warning("Please enter a valid destination.")
-        else:
-            interest_list = [i.strip() for i in interests.split(",")] if interests else []
-            req = ItineraryRequest(city=city_clean, budget=budget, trip_days=days, interests=interest_list, travel_style=["Solo"])
-            corr_id = event_service.log_prompt_submitted(st.session_state.conversation_id, city_clean, budget, days)
+        # 2. Generation Phase
+        if submitted:
+            city_clean = sanitize_text(city)
+            if not city_clean:
+                st.warning("Please enter a valid destination.")
+            else:
+                interest_list = [i.strip() for i in interests.split(",")] if interests else []
+                # Store params for the Trip Summary page
+                st.session_state.trip_params = {'city': city_clean, 'days': days, 'budget': budget, 'interests': interest_list}
+                
+                req = ItineraryRequest(city=city_clean, budget=budget, trip_days=days, interests=interest_list, travel_style=["Solo"])
+                corr_id = event_service.log_prompt_submitted(st.session_state.conversation_id, city_clean, budget, days)
+                
+                render_processing_state()
+                
+                try:
+                    response, config, p_ver, d_ver = planner_service.generate_itinerary(req)
+                    
+                    itin_id = itinerary_repo.create_itinerary(
+                        conversation_id=st.session_state.conversation_id,
+                        itinerary_text=response.text,
+                        prompt_id=config.active_prompt_id,
+                        model_version_id=config.active_model_id,
+                        config_snapshot={"temperature": 0.7, "max_tokens": 2000, "provider": "Groq"},
+                        word_count=len(response.text.split())
+                    )
+                    
+                    training_repo.enqueue(itin_id)
+                    event_service.log_generation(st.session_state.conversation_id, corr_id, True)
+                    
+                    st.session_state.itinerary = response.text
+                    st.session_state.itinerary_id = itin_id
+                    st.session_state.corr_id = corr_id
+                    st.rerun() # Refresh to show results cleanly
+                    
+                except Exception as e:
+                    event_service.log_generation(st.session_state.conversation_id, corr_id, False, str(e))
+                    st.error(f"Failed to generate: {e}")
+
+        # 3. Result, Analytics & Feedback Flow
+        if "itinerary" in st.session_state and not submitted:
+            rating, comments, submit_fb = render_results_dashboard(
+                st.session_state.itinerary,
+                st.session_state.itinerary_id,
+                st.session_state.corr_id
+            )
             
-            render_processing_state()
-            
-            try:
-                response, config, p_ver, d_ver = planner_service.generate_itinerary(req)
+            if submit_fb:
+                itinerary_repo.update_rating(st.session_state.itinerary_id, rating, comments)
+                event_service.log_feedback(st.session_state.conversation_id, st.session_state.corr_id, rating, comments)
+                st.success("✅ Feedback securely recorded and queued for pipeline processing.")
                 
-                itin_id = itinerary_repo.create_itinerary(
-                    conversation_id=st.session_state.conversation_id,
-                    itinerary_text=response.text,
-                    prompt_id=config.active_prompt_id,
-                    model_version_id=config.active_model_id,
-                    config_snapshot={"temperature": 0.7, "max_tokens": 2000, "provider": "Groq"},
-                    word_count=len(response.text.split())
-                )
-                
-                training_repo.enqueue(itin_id)
-                event_service.log_generation(st.session_state.conversation_id, corr_id, True)
-                
-                st.session_state.itinerary = response.text
-                st.session_state.itinerary_id = itin_id
-                st.session_state.corr_id = corr_id
-                st.rerun() # Refresh to show results cleanly
-                
-            except Exception as e:
-                event_service.log_generation(st.session_state.conversation_id, corr_id, False, str(e))
-                st.error(f"Failed to generate: {e}")
-
-    # 3. Result, Analytics & Feedback Flow
-    if "itinerary" in st.session_state and not submitted:
-        rating, comments, submit_fb = render_results_dashboard(
-            st.session_state.itinerary,
-            st.session_state.itinerary_id,
-            st.session_state.corr_id
-        )
-        
-        if submit_fb:
-            itinerary_repo.update_rating(st.session_state.itinerary_id, rating, comments)
-            event_service.log_feedback(st.session_state.conversation_id, st.session_state.corr_id, rating, comments)
-            st.success("✅ Feedback securely recorded and queued for pipeline processing.")
+    elif current_page == "Trip Summary":
+        render_trip_summary()
+    elif current_page == "AI Metrics":
+        render_ai_metrics(analytics_repo)
+    elif current_page == "Analytics Dashboard":
+        render_analytics_dashboard(analytics_repo)
+    elif current_page == "Database Manager":
+        render_database_manager(analytics_repo)
 
 except TravelerException as te:
     logger.error("Domain exception occurred", exc_info=True, extra={"status": "failed"})
