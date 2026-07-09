@@ -5,7 +5,7 @@ from src.providers.base import ProviderInterface, ProviderRequest, ProviderRespo
 from src.domain.exceptions import ProviderUnavailable
 
 class GroqProvider(ProviderInterface):
-    def __init__(self, api_key: str = None, model: str = "llama3-8b-8192"):
+    def __init__(self, api_key: str = None, model: str = "llama-3.1-8b-instant"):
         self.api_key = api_key or os.getenv("GROQ_API_KEY")
         self.model = model
         self.client = Groq(api_key=self.api_key) if self.api_key else None
