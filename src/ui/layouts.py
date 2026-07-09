@@ -37,15 +37,17 @@ class SidebarLayout:
     def render(session_id: str, warnings: list = None):
         with st.sidebar:
             st.html("""
-            <div class="h-full flex flex-col gap-xl">
+            <div class="h-full flex flex-col pt-[32px] px-[16px]">
                 <!-- Header -->
-                <div class="flex items-center gap-md px-md mb-8">
-                    <div class="w-12 h-12 rounded-full overflow-hidden shrink-0 ring-1 ring-outline-variant shadow-sm">
-                        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZvYxtOPSuoT8fq8jXUBiiXhZ-X9rqmlf4QguRuexgAIiXj3LzBAR5_5jejlXJFZ1MBujzaLbhBn9-cwjpNHAUS2-Z0qrUYV1iewStCRo58GW53xY2tVTeJcc4CepJxF2MPukPLmdB_SPFJhAYyiKMbCH2W4fQU2hzi8Co6VmuPizGxQ-B0hsJKQNvz-i7xzQrsoeiAklxqbIGbA7tfej0XD7vSfN6ko_ZYLbno-15lnRUk1-VkSOGIg" class="w-full h-full object-cover" />
-                    </div>
-                    <div class="flex flex-col min-w-0">
-                        <span class="font-headline-md text-headline-md text-on-surface truncate">Traveler LLM</span>
-                        <span class="font-body-md text-sm text-on-surface-variant truncate">Modern AI Professional</span>
+                <div class="flex items-center gap-[8px] px-[8px] mb-[16px]">
+                    <span class="font-display-lg-mobile text-display-lg-mobile text-primary-fixed-dim tracking-tight">Traveler LLM</span>
+                </div>
+                
+                <div class="flex items-center gap-[16px] px-[8px] mb-[24px]">
+                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZvYxtOPSuoT8fq8jXUBiiXhZ-X9rqmlf4QguRuexgAIiXj3LzBAR5_5jejlXJFZ1MBujzaLbhBn9-cwjpNHAUS2-Z0qrUYV1iewStCRo58GW53xY2tVTeJcc4CepJxF2MPukPLmdB_SPFJhAYyiKMbCH2W4fQU2hzi8Co6VmuPizGxQ-B0hsJKQNvz-i7xzQrsoeiAklxqbIGbA7tfej0XD7vSfN6ko_ZYLbno-15lnRUk1-VkSOGIg" class="w-10 h-10 rounded-full object-cover border border-outline-variant" />
+                    <div>
+                        <div class="font-body-md text-body-md text-on-background font-semibold">Modern AI Professional</div>
+                        <div class="font-code-sm text-code-sm text-on-surface-variant">Pro Account</div>
                     </div>
                 </div>
             </div>
@@ -56,29 +58,34 @@ class SidebarLayout:
             st.html("<div style='margin: var(--space-6) 0;'></div>")
             
             # Workspace Group
-            st.html("<span class='px-md py-xs font-code-sm text-xs text-on-surface-variant uppercase tracking-wider block mb-2'>Workspace</span>")
-            components.render_sidebar_link("Dashboard", Icons.DASHBOARD, is_active=False)
-            components.render_sidebar_link("Itinerary Planner", Icons.SPARKLES, is_active=True)
-            components.render_sidebar_link("Active Trips", Icons.MAP, is_active=False)
+            st.html("<span class='px-md py-xs font-code-sm text-xs text-on-surface-variant uppercase tracking-wider block mb-2 px-[16px]'>Workspace</span>")
+            st.html("""
+            <div class="flex flex-col gap-[8px] px-[16px]">
+                <a class="flex items-center gap-[16px] text-on-surface-variant hover:text-primary-fixed-dim px-[16px] py-[8px] rounded-lg transition-colors duration-200" href="#"><span class="material-symbols-outlined">dashboard</span><span class="font-body-md">Dashboard</span></a>
+                <a class="flex items-center gap-[16px] bg-primary-container text-on-primary-container rounded-lg px-[16px] py-[8px] font-bold scale-95 transition-transform" href="#"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_awesome</span><span class="font-body-md">Itinerary Planner</span></a>
+                <a class="flex items-center gap-[16px] text-on-surface-variant hover:text-primary-fixed-dim px-[16px] py-[8px] rounded-lg transition-colors duration-200" href="#"><span class="material-symbols-outlined">map</span><span class="font-body-md">Active Trips</span></a>
+            </div>
+            """)
             
             st.html("<div style='margin: var(--space-6) 0;'></div>")
             
             # Operations Group
-            st.html("<span class='px-md py-xs font-code-sm text-xs text-on-surface-variant uppercase tracking-wider block mb-2'>Operations</span>")
-            components.render_sidebar_link("System Health", Icons.HEARTBEAT, is_active=False)
-            components.render_sidebar_link("Configuration", Icons.SETTINGS, is_active=False)
+            st.html("<span class='px-md py-xs font-code-sm text-xs text-on-surface-variant uppercase tracking-wider block mb-2 px-[16px]'>Operations</span>")
+            st.html("""
+            <div class="flex flex-col gap-[8px] px-[16px]">
+                <a class="flex items-center gap-[16px] text-on-surface-variant hover:text-primary-fixed-dim px-[16px] py-[8px] rounded-lg transition-colors duration-200" href="#"><span class="material-symbols-outlined">analytics</span><span class="font-body-md">System Health</span></a>
+                <a class="flex items-center gap-[16px] text-on-surface-variant hover:text-primary-fixed-dim px-[16px] py-[8px] rounded-lg transition-colors duration-200" href="#"><span class="material-symbols-outlined">settings</span><span class="font-body-md">Configuration</span></a>
+            </div>
+            """)
             
-            st.html("<div style='margin-top: auto; border-top: 1px solid var(--color-border-default); padding-top: var(--space-4);'></div>")
+            st.html("<div style='margin-top: 24px; border-top: 1px solid #3b494c; padding-top: 16px; margin-left: 16px; margin-right: 16px;'></div>")
             
-            components.render_sidebar_link("Help", Icons.HELP, is_active=False)
-            components.render_sidebar_link("Feedback", Icons.FEEDBACK, is_active=False)
-
-            if warnings:
-                st.html("<div style='margin-top: var(--space-4);'>")
-                components.render_badge("Degraded", "warning")
-                for w in warnings:
-                    st.caption(f"⚠️ {w}")
-                st.html("</div>")
+            st.html("""
+            <div class="flex flex-col gap-[8px] px-[16px]">
+                <a class="flex items-center gap-[16px] text-on-surface-variant hover:text-primary-fixed-dim px-[16px] py-[8px] rounded-lg transition-colors duration-200" href="#"><span class="material-symbols-outlined">help</span><span class="font-code-sm">Help</span></a>
+                <a class="flex items-center gap-[16px] text-on-surface-variant hover:text-primary-fixed-dim px-[16px] py-[8px] rounded-lg transition-colors duration-200" href="#"><span class="material-symbols-outlined">rate_review</span><span class="font-code-sm">Feedback</span></a>
+            </div>
+            """)
 
 class DashboardLayout:
     @staticmethod
