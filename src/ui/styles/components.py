@@ -1,117 +1,81 @@
 def get_components_css() -> str:
     return """
     /* =========================================================================
-       4. COMPONENT LIBRARY PRIMITIVES
+       4. COMPONENT LIBRARY PRIMITIVES (Strict Baseline)
        ========================================================================= */
 
-    /* Cards & Surfaces */
-    .c-surface {
-        background-color: var(--t-layer-base);
-        border: 1px solid var(--t-color-outline-variant);
-        border-radius: var(--radius-lg);
-        padding: var(--comp-padding-y, var(--space-4)) var(--comp-padding-x, var(--space-4));
-        box-shadow: var(--t-shadow-level-1);
-        transition: transform var(--duration-fast) var(--ease-standard), 
-                    box-shadow var(--duration-fast) var(--ease-standard);
-    }
-    .c-surface--hoverable:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--t-shadow-level-2);
-        border-color: var(--t-color-outline);
+    /* Cards */
+    .c-card {
+        background-color: var(--c-layer-base);
+        border: 1px solid var(--c-outline-variant);
+        border-radius: var(--radius-xl); /* 8px */
+        padding: var(--space-md);
+        box-shadow: var(--shadow-sm); /* Border + Shadow */
+        transition: box-shadow 300ms ease, transform 300ms ease;
     }
     
-    .c-surface--ai-glow {
-        box-shadow: var(--t-shadow-glow);
-        border-color: var(--t-color-primary-container);
+    .c-card:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
     }
-
-    /* Dividers */
-    .c-divider {
-        height: 1px;
-        background-color: var(--t-color-outline-variant);
-        margin: var(--space-4) 0;
-        width: 100%;
-        border: none;
+    
+    .c-card--active-glow {
+        box-shadow: var(--shadow-glow);
+        border-color: var(--c-primary-container);
     }
 
     /* Badges */
     .c-badge {
         display: inline-flex;
         align-items: center;
-        gap: var(--space-1);
+        gap: var(--space-xs);
         padding: 2px 8px;
-        border-radius: var(--radius-pill);
+        border-radius: var(--radius-full);
+        font-family: 'Geist', sans-serif;
         font-size: var(--text-label);
         font-weight: 500;
+        letter-spacing: 0.05em;
         line-height: 1.2;
         border: 1px solid transparent;
         white-space: nowrap;
     }
-    .c-badge--success { background-color: rgba(129, 201, 149, 0.15); color: var(--t-color-success); border-color: rgba(129, 201, 149, 0.3); }
-    .c-badge--error { background-color: rgba(255, 180, 171, 0.15); color: var(--t-color-error); border-color: rgba(255, 180, 171, 0.3); }
-    .c-badge--warning { background-color: rgba(253, 214, 99, 0.15); color: var(--t-color-warning); border-color: rgba(253, 214, 99, 0.3); }
-    .c-badge--neutral { background-color: var(--t-layer-highest); color: var(--t-color-secondary); }
-    .c-badge--ai { background-color: rgba(0, 224, 255, 0.15); color: var(--t-color-primary-container); border-color: rgba(0, 224, 255, 0.3); }
+    .c-badge--error { background-color: var(--c-error-container); color: var(--c-error); border-color: rgba(255, 180, 171, 0.3); }
+    .c-badge--primary { background-color: rgba(0, 224, 255, 0.15); color: var(--c-primary-container); border-color: rgba(0, 224, 255, 0.3); }
+    .c-badge--neutral { background-color: var(--c-layer-highest); color: var(--c-secondary); }
 
-    /* Empty States */
+    /* Empty States (Not explicitly defined in spec, mapped to basic container) */
     .c-empty-state {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
         text-align: center;
-        padding: var(--space-10) var(--space-4);
+        padding: var(--space-xl) var(--space-md);
         background-color: transparent;
-        border: 1px dashed var(--t-color-outline-variant);
-        border-radius: var(--radius-lg);
-    }
-    .c-empty-state__icon {
-        font-size: 32px;
-        color: var(--t-color-secondary);
-        margin-bottom: var(--space-4);
+        border: 1px dashed var(--c-outline-variant);
+        border-radius: var(--radius-xl);
     }
     
-    /* Skeleton Loaders (Processing States) */
+    /* Skeleton Loaders */
     .c-skeleton {
-        background-color: var(--t-layer-high);
-        border-radius: var(--radius-md);
-        animation: pulse var(--anim-pulse-dur, 2s) infinite cubic-bezier(0.4, 0, 0.6, 1);
+        background-color: var(--c-layer-high);
+        border-radius: var(--radius-default);
+        animation: pulse 2s infinite;
     }
     
     /* Metrics */
     .c-metric {
         display: flex;
         flex-direction: column;
-        gap: var(--space-1);
+        gap: var(--space-xs);
     }
     .c-metric__title {
+        font-family: 'Geist', sans-serif;
         font-size: var(--text-label);
-        color: var(--t-color-secondary);
+        color: var(--c-secondary);
         text-transform: uppercase;
         letter-spacing: 0.05em;
     }
     .c-metric__value {
         font-size: var(--text-headline);
         font-weight: 600;
-        color: var(--t-color-primary);
+        color: var(--c-primary);
         line-height: 1.1;
-    }
-    
-    /* AI Transparency Footer */
-    .c-ai-footer {
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-4);
-        font-size: var(--text-label);
-        color: var(--t-color-secondary);
-        background-color: var(--t-layer-lowest);
-        padding: var(--space-2) var(--space-4);
-        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-        border-top: 1px solid var(--t-color-outline-variant);
-        align-items: center;
-    }
-    .c-ai-footer__item {
-        display: flex;
-        align-items: center;
-        gap: var(--space-1);
     }
     """

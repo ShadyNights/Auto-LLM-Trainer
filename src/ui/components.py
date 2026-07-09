@@ -1,67 +1,60 @@
 import streamlit as st
-from typing import Optional, List, Dict, Any
+from typing import Optional
 
 # =========================================================================
-# COMPONENT LIBRARY (Primitives)
+# COMPONENT LIBRARY (Strict Baseline)
 # =========================================================================
 
-def render_stack(content_html: str, gap: str = "4", direction: str = "col", class_name: str = "") -> str:
-    """Renders a flex stack container."""
-    d_class = "l-stack-h" if direction == "row" else "l-stack"
-    html = f'<div class="{d_class} gap-{gap} {class_name}">{content_html}</div>'
-    return html
-
-def render_divider(class_name: str = ""):
-    """Renders a semantic divider."""
-    st.markdown(f'<hr class="c-divider {class_name}"/>', unsafe_allow_html=True)
-
-def render_surface(content_html: str, elevation: int = 1, hoverable: bool = False, ai_glow: bool = False, class_name: str = "") -> str:
-    """Renders a semantic surface container."""
-    classes = ["c-surface", f"elevate-{elevation}"]
-    if hoverable: classes.append("c-surface--hoverable")
-    if ai_glow: classes.append("c-surface--ai-glow")
+def render_card(content_html: str, active_glow: bool = False, class_name: str = ""):
+    """Renders a standard card layout in Streamlit."""
+    classes = ["c-card"]
+    if active_glow: classes.append("c-card--active-glow")
     if class_name: classes.append(class_name)
     
-    return f'<div class="{" ".join(classes)}">{content_html}</div>'
-
-def render_card(content_html: str, hoverable: bool = False, ai_glow: bool = False, class_name: str = ""):
-    """Renders a standard card layout in Streamlit."""
-    html = render_surface(content_html, elevation=1, hoverable=hoverable, ai_glow=ai_glow, class_name=class_name)
+    html = f'<div class="{" ".join(classes)}">{content_html}</div>'
     st.markdown(html, unsafe_allow_html=True)
 
-def render_header(title: str, subtitle: Optional[str] = None, icon: Optional[str] = None, size: str = "h1", class_name: str = ""):
-    """Renders a page or section header."""
-    icon_html = f"<span aria-hidden='true' class='mr-2'>{icon}</span> " if icon else ""
-    subtitle_html = f"<p class='text-secondary'>{subtitle}</p>" if subtitle else ""
+def render_header(title: str, subtitle: Optional[str] = None, icon: Optional[str] = None):
+    """Renders a page or section header (Maps to Headline 2 or 3)."""
+    icon_html = f"<span aria-hidden='true' style='margin-right:8px;'>{icon}</span>" if icon else ""
+    subtitle_html = f"<p>{subtitle}</p>" if subtitle else ""
     
     st.markdown(f"""
-    <div class="mb-6 {class_name}">
-        <{size} class="mb-2">{icon_html}{title}</{size}>
+    <div style="margin-bottom: var(--space-lg);">
+        <h2>{icon_html}{title}</h2>
         {subtitle_html}
     </div>
     """, unsafe_allow_html=True)
 
-def render_section(title: str, subtitle: Optional[str] = None, icon: Optional[str] = None, class_name: str = ""):
-    """Renders a standardized section wrapper."""
-    render_header(title, subtitle, icon, size="h3", class_name=class_name)
+def render_section(title: str, subtitle: Optional[str] = None, icon: Optional[str] = None):
+    """Renders a standardized section wrapper (Maps to Headline 3)."""
+    icon_html = f"<span aria-hidden='true' style='margin-right:8px;'>{icon}</span>" if icon else ""
+    subtitle_html = f"<p>{subtitle}</p>" if subtitle else ""
+    
+    st.markdown(f"""
+    <div style="margin-bottom: var(--space-md);">
+        <h3>{icon_html}{title}</h3>
+        {subtitle_html}
+    </div>
+    """, unsafe_allow_html=True)
 
 def render_badge(text: str, variant: str = "neutral", class_name: str = "") -> str:
     """
     Renders an inline badge. 
-    Variants: success, error, warning, neutral, ai
+    Supported Variants (Baseline): primary, error, neutral
     """
     return f'<span class="c-badge c-badge--{variant} {class_name}">{text}</span>'
 
-def render_status(text: str, state: str = "neutral", class_name: str = ""):
+def render_status(text: str, state: str = "neutral"):
     """Renders a badge directly into Streamlit."""
-    st.markdown(render_badge(text, variant=state, class_name=class_name), unsafe_allow_html=True)
+    st.markdown(render_badge(text, variant=state), unsafe_allow_html=True)
 
-def render_metric(title: str, value: str, label: Optional[str] = None, variant: str = "neutral", class_name: str = ""):
-    """Renders a professional metric layout."""
+def render_metric(title: str, value: str, label: Optional[str] = None, variant: str = "neutral"):
+    """Renders a professional metric layout (Metric Card)."""
     label_html = render_badge(label, variant=variant) if label else ""
     
     html = f"""
-    <div class="c-metric {class_name}">
+    <div class="c-metric">
         <div class="c-metric__title">{title}</div>
         <div class="c-metric__value">{value}</div>
         {label_html}
@@ -69,47 +62,24 @@ def render_metric(title: str, value: str, label: Optional[str] = None, variant: 
     """
     st.markdown(html, unsafe_allow_html=True)
 
-def render_empty_state(title: str, description: str, icon: str = "block", class_name: str = ""):
+def render_empty_state(title: str, description: str, icon: str = "block"):
     """Renders an empty state."""
     st.markdown(f"""
-    <div class="c-empty-state {class_name}">
-        <span class="c-empty-state__icon material-symbols-outlined">{icon}</span>
+    <div class="c-empty-state">
+        <span class="material-symbols-outlined" style="font-size:32px; color:var(--c-secondary); margin-bottom:var(--space-md);">{icon}</span>
         <h3>{title}</h3>
-        <p class="text-secondary">{description}</p>
+        <p>{description}</p>
     </div>
     """, unsafe_allow_html=True)
 
-def render_loading(title: str = "Processing...", description: str = "Please wait", lines: int = 3, class_name: str = ""):
+def render_loading(title: str = "Processing...", description: str = "Please wait", lines: int = 3):
     """Renders a skeleton loading state."""
-    lines_html = "".join(['<div class="c-skeleton mb-2" style="height:16px; width:100%;"></div>' for _ in range(lines)])
+    lines_html = "".join(['<div class="c-skeleton" style="height:16px; width:100%; margin-bottom:var(--space-sm);"></div>' for _ in range(lines)])
     html = f"""
-    <div class="c-surface {class_name}">
-        <div class="c-skeleton mb-4" style="height:24px; width:40%;"></div>
+    <div class="c-card">
+        <div class="c-skeleton" style="height:24px; width:40%; margin-bottom:var(--space-md);"></div>
         {lines_html}
-        <div class="c-skeleton mt-2" style="height:16px; width:60%;"></div>
+        <div class="c-skeleton" style="height:16px; width:60%; margin-top:var(--space-sm);"></div>
     </div>
     """
     st.markdown(html, unsafe_allow_html=True)
-
-def render_ai_transparency_footer(provider: str, model: str, prompt_version: str, config_version: str, timestamp: str, class_name: str = "") -> str:
-    """Renders the mandatory AI Transparency Footer."""
-    return f"""
-    <div class="c-ai-footer {class_name}">
-        <div class="c-ai-footer__item">
-            <strong>Generated by</strong> 
-            {render_badge("Traveler LLM", variant="ai")}
-        </div>
-        <div class="c-ai-footer__item">
-            <strong>Provider:</strong> {provider} ({model})
-        </div>
-        <div class="c-ai-footer__item">
-            <strong>Prompt:</strong> {prompt_version}
-        </div>
-        <div class="c-ai-footer__item">
-            <strong>Config:</strong> {config_version}
-        </div>
-        <div class="c-ai-footer__item" style="margin-left: auto;">
-            <strong>Time:</strong> {timestamp}
-        </div>
-    </div>
-    """

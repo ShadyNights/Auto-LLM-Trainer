@@ -1,228 +1,358 @@
-# Traveler LLM Design System (2026 Specification)
+# Design System
 
-> [!NOTE]
-> This document is the authoritative design specification for the Traveler LLM platform. It defines the visual identity, tokens, component architectures, patterns, and principles required to build a scalable, accessible, and premium AI SaaS experience.
+## 1. Design Philosophy
+- Modern AI SaaS Dashboard
+- Enterprise-first
+- Dark-first design
+- Minimal visual noise
+- High information density
+- Content-focused
+- Card-based architecture
+- Material 3 foundations
+- Professional developer tooling aesthetics
 
----
+## 2. Design Principles
+**Visual**
+- Consistent spacing
+- Strong hierarchy
+- Large display typography
+- Soft rounded corners
+- Elevated surfaces instead of heavy borders
+- Low contrast backgrounds
+- High contrast content
+- Minimal accent color usage
 
-## 1. Design Philosophy & Foundations
+**UX**
+- Progressive disclosure
+- Clear navigation hierarchy
+- Immediate visual feedback
+- Persistent navigation
+- Accessible interaction states
+- Responsive-first
 
-Our interface is built on a "Dark-first, Content-first" philosophy. The aesthetic is strictly professional, minimizing visual noise to maximize information density.
+## 3. Color System
 
-### 1.1 Design Goals
-- **Professional Enterprise SaaS**: The UI must feel robust, trustworthy, and precise.
-- **AI-Native**: Built from the ground up to display generative text, active streams, and complex multi-modal analytics effortlessly.
-- **Invisible UI**: The interface should recede; the user's workflow and the AI's output are the heroes.
-- **Glass-Free, Flat Surfaces**: Rely on deep, rich, solid colors and subtle elevation layers rather than aggressive blurs or translucent glassmorphism.
+**Primary**
+| Token | Value |
+|---|---|
+| Primary | `#BAF2FF` |
+| Primary Container | `#00E0FF` |
+| Primary Fixed | `#A5EEFF` |
+| Primary Fixed Dim | `#00DAF8` |
+| Surface Tint | `#00DAF8` |
 
-### 1.2 Accessibility Principles (WCAG 2.2 AA)
-- **Contrast Compliance**: All text must meet a minimum 4.5:1 contrast ratio against its background. Non-text interactive elements must meet 3:1.
-- **Interaction Targets**: Minimum target size for interactive elements is 44x44px (except in compact density views).
-- **Keyboard Navigation**: All interactive elements must be fully keyboard accessible with defined `Skip Navigation` anchors.
-- **Screen Reader Labels**: Icons and visual states must have `aria-labels` or visually hidden `.sr-only` text.
-- **Reduced Transparency**: Ensure opacities can be bypassed if reduced transparency is requested.
-- **High Contrast**: Enforce `#000000` backgrounds and `#FFFFFF` text boundaries when high contrast is active.
+**Background**
+| Token | Value |
+|---|---|
+| Background | `#0B1326` |
+| Surface | `#0B1326` |
+| Surface Bright | `#31394D` |
+| Surface Dim | `#0B1326` |
 
-### 1.3 Consistency Rules
-- Never introduce one-off hex codes. All values must map to the Semantic Token Hierarchy.
-- Prefer semantic layout primitives over raw CSS grids in component logic.
+**Surface Layers**
+| Token | Value |
+|---|---|
+| Lowest | `#060E20` |
+| Low | `#131B2E` |
+| Base | `#171F33` |
+| High | `#222A3D` |
+| Highest | `#2D3449` |
 
----
+**Secondary**
+| Token | Value |
+|---|---|
+| Secondary | `#BCC7DE` |
+| Secondary Container | `#3E495D` |
+| Secondary Fixed | `#D8E3FB` |
+| Secondary Fixed Dim | `#BCC7DE` |
 
-## 2. Token Architecture Hierarchy
+**Tertiary**
+| Token | Value |
+|---|---|
+| Tertiary | `#FFE6B6` |
+| Tertiary Container | `#FEC42E` |
+| Tertiary Fixed | `#FFDF9D` |
 
-The token architecture is divided into three distinct layers to ensure scalability and maintainability:
+**Semantic Error**
+| Token | Value |
+|---|---|
+| Error | `#FFB4AB` |
+| Error Container | `#93000A` |
 
-1. **Foundation Tokens**: Raw values (Hex codes, pixel measurements, ms durations).
-2. **Semantic Tokens**: Contextual definitions (Primary, Surface, Success, Border).
-3. **Component Tokens**: Element-specific mappings (`button-bg`, `card-radius`).
+**Outline**
+| Token | Value |
+|---|---|
+| Outline | `#859397` |
+| Outline Variant | `#3B494C` |
 
-### 2.1 Foundation Tokens
+## 4. Typography
+**Display Large**
+- Font: Space Grotesk
+- Weight: 700
+- Size: 48px
+- Line Height: 1.1
 
-**Theme Palette**
-- Primary: `#BAF2FF`, `#00E0FF`, `#A5EEFF`, `#00DAF8`
-- Surface (Dark): `#0B1326`, `#31394D`, `#060E20`, `#131B2E`, `#171F33`, `#222A3D`, `#2D3449`
-- Secondary: `#BCC7DE`, `#3E495D`, `#D8E3FB`
-- Tertiary: `#FFE6B6`, `#FEC42E`, `#FFDF9D`
-- Semantic: `#FFB4AB`, `#93000A`, `#81C995`, `#FDD663`
-- Outlines: `#859397`, `#3B494C`
+**Mobile Display**
+- Size: 32px
+- Weight: 700
 
-**Typography Scale (Responsive)**
-| Role | Font | Size (Desk/Mob) | Weight | Line Height | Tracking |
-|---|---|---|---|---|---|
-| **Display** | Space Grotesk | 48px / 32px | 700 | 1.1 | 0em |
-| **Headline** | Geist | 24px / 20px | 600 | 1.2 | -0.01em |
-| **Title** | Geist | 20px / 18px | 600 | 1.4 | 0em |
-| **Body** | Geist | 16px / 16px | 400 | 1.6 | 0em |
-| **Label** | Geist | 12px / 12px | 500 | 1.4 | 0.05em |
-| **Code** | JetBrains Mono | 13px / 13px | 400 | 1.5 | 0em |
+**Headline**
+- Font: Geist
+- Size: 24px
+- Weight: 600
 
-**Spacing Grid (4px Baseline)**
-- `space-base`: 4px | `space-xs`: 4px | `space-sm`: 8px | `space-md`: 16px | `space-lg`: 24px | `space-xl`: 40px | `space-2xl`: 64px
+**Body**
+- Font: Geist
+- Size: 16px
+- Weight: 400
+- Line Height: 1.6
 
-**Border Radius**
-- `radius-sm`: 2px | `radius-md`: 4px | `radius-lg`: 8px | `radius-full`: 12px | `radius-pill`: 9999px
+**Label**
+- Font: Geist
+- Size: 12px
+- Weight: 500
+- Letter Spacing: 0.05em
 
-**Opacity**
-- `opacity-hover`: `0.08` | `opacity-focus`: `0.12` | `opacity-disabled`: `0.38` | `opacity-scrim`: `0.60`
+**Code**
+- Font: JetBrains Mono
+- Size: 13px
+- Weight: 400
 
-**Motion**
-- `duration-fast`: `150ms` | `duration-normal`: `200ms` | `duration-slow`: `300ms` (Max duration for standard transitions)
-- `ease-standard`: `cubic-bezier(0.2, 0.0, 0, 1.0)` | `ease-enter`: `cubic-bezier(0.0, 0.0, 0.2, 1)` | `ease-exit`: `cubic-bezier(0.4, 0.0, 1, 1)`
+## 5. Font Stack
+- Primary: Geist
+- Display: Space Grotesk
+- Monospace: JetBrains Mono
 
-### 2.2 Semantic Tokens
+## 6. Spacing System
+Uses a 4px baseline grid.
+| Token | Value |
+|---|---|
+| Base | 4px |
+| XS | 4px |
+| SM | 8px |
+| MD | 16px |
+| LG | 24px |
+| XL | 40px |
 
-**Action & Brand**
-- `color-primary`: Brand text, active links.
-- `color-primary-container`: Primary buttons, active selections.
-- `color-surface-tint`: Focused glow origins.
+Container Width: 1440px
 
-**Surface Elevation Hierarchy**
-- `color-bg-base`: Absolute root background.
-- `color-layer-lowest`: Underlays, sidebars.
-- `color-layer-base`: Standard cards and widgets.
-- `color-layer-highest`: Tooltips, snackbars.
+## 7. Border Radius
+| Token | Radius |
+|---|---|
+| Default | 2px |
+| LG | 4px |
+| XL | 8px |
+| Full | 12px |
 
-**Feedback & Status**
-- `color-error`: Validation text, destructive actions.
-- `color-success`: Completed states, online indicators.
-- `color-warning`: Pending states.
+## 8. Elevation
+Uses extremely subtle elevation.
 
-**Data Visualization Tokens (Charts & Graphs)**
-- `chart-1`: `#00E0FF` (Primary metric)
-- `chart-2`: `#FEC42E` (Secondary metric)
-- `chart-3`: `#BCC7DE` (Tertiary metric)
-- `chart-success`: `#81C995`
-- `chart-warning`: `#FDD663`
-- `chart-error`: `#FFB4AB`
-- `chart-grid-line`: `color-outline-variant` (Opacity 0.3)
-- `chart-axis-text`: `color-secondary`
-- `chart-tooltip-bg`: `color-layer-highest`
+**Levels**
+- Border only
+- Border + Shadow
+- Glow Shadow
+- Accent Glow
 
-**Focus & Borders**
-- `--t-focus-ring`: `0 0 0 2px color-bg-base, 0 0 0 4px color-primary-container` (Universally applied to ALL interactive elements on `:focus-visible`).
-- `color-outline`: High contrast boundaries.
-- `color-outline-variant`: Subtle dividers.
+**Examples**
+- `shadow-sm`
+- `shadow-md`
+- `0 0 15px rgba(0,224,255,.2)`
 
-### 2.3 Interaction Elevation Rules
-Elevation is strictly mapped to interaction context to avoid arbitrary shadow usage.
-- **Level 0 (Background)**: `color-bg-base`, no shadow. (App background)
-- **Level 1 (Card)**: `color-layer-base`, `shadow-sm`. (Default cards)
-- **Level 2 (Hover)**: Translate Y `-2px`, `shadow-md`. (Interactive cards, active buttons)
-- **Level 3 (Overlay)**: `color-layer-high`, `shadow-lg`. (Dropdowns, Popovers)
-- **Level 4 (Modal)**: `color-layer-highest`, `shadow-xl`, requires `opacity-scrim`. (Drawers, Dialogs)
+## 9. Component Library
 
----
+**Navigation**
+- Sidebar
+- Mobile Navigation
+- Top App Bar
+- Bottom Navigation
+- Navigation Groups
+- Navigation Item
+- Active Navigation Item
 
-## 3. Structural Systems
+**Buttons**
+- Primary Button
+- Secondary Button
+- Ghost Button
+- Icon Button
+- Toggle Button
+- CTA Button
 
-### 3.1 Density Modes
-AI dashboards require flexible data density.
-- **Compact**: `padding` halves, row heights collapse (Useful for massive analytics tables).
-- **Comfortable** (Default): Adheres exactly to standard `space-*` tokens.
-- **Spacious**: `padding` doubles, ideal for focus modes or single-task workflows.
+**Cards**
+- Metric Card
+- Status Card
+- Information Card
+- Analytics Card
+- Hero Card
+- AI Suggestion Card
+- Timeline Card
 
-### 3.2 Responsive & Layout Tokens
-- **Max Sidebar Width**: `280px`
-- **Collapsed Sidebar Width**: `64px`
-- **Max Content Width**: `1440px` (Dashboard grids)
-- **Reading Width**: `720px` (Optimal line length for AI generations and documentation)
+**Inputs**
+- Text Field
+- Tag Input
+- Segmented Control
+- Form Group
+- Search Input
 
-### 3.3 Scrollbars
-- **Track**: `transparent` or `color-layer-lowest`.
-- **Thumb**: `color-outline-variant`, `radius-pill`.
-- **Hover**: Thumb shifts to `color-outline`.
+**Badges**
+- Status Badge
+- Provider Badge
+- Version Badge
+- Pipeline Badge
+- AI Badge
 
-### 3.4 Icon Rules (Material Symbols Outlined)
-- **18px**: Inline text context, compact table actions.
-- **20px**: Standard buttons, default UI actions.
-- **24px**: Main sidebar navigation, empty states, prominent toggles.
-- **32px**: Hero section icons, major empty state graphics.
+**Indicators**
+- Online Indicator
+- Loading Indicator
+- Skeleton Loader
+- Blinking Cursor
+- Pulse Animation
 
----
+**Timeline**
+- Day Timeline
+- Activity Card
+- AI Recommendation Card
 
-## 4. Component Specifications
+**Tabs**
+- Primary Tabs
+- Analytics Tabs
+- Feedback Tabs
 
-*Note: Components are classified by Maturity: Stable, Beta, Experimental.*
+**Metrics**
+- KPI Cards
+- Statistics
+- Trend Indicators
 
-### 4.1 Buttons [Stable]
-- **Primary**: Background `color-primary-container`, Text `color-bg-base`. 
-- **Interaction**: Scales to `0.98` on `:active`. Universally receives `--t-focus-ring` on focus.
+## 10. Iconography
+- Uses: Material Symbols Outlined
+- Variants: Outline, Filled
+- Size: 18px, 20px, 24px, 32px
 
-### 4.2 Tables [Stable]
-- **Header**: Sticky `top-0`, Background `color-layer-low`, typography `Label`.
-- **Rows**: Apply `opacity-hover` on row `:hover`.
-- **Zebra Striping**: Disabled by default for cleaner data view.
-- **Selected**: Background `color-primary-fixed` (10% opacity).
+## 11. Motion
+**Animations**
+- Pulse: 2s infinite
+- Blink: 1s infinite
+- Hover: 200–500ms
 
-### 4.3 Code Blocks [Stable]
-- **Background**: `color-layer-lowest`.
-- **Typography**: JetBrains Mono `13px`.
-- **Features**: Must include a sticky "Copy" ghost button top-right. Line wrapping defaults to disabled (horizontal scroll enabled) to preserve formatting.
+**Transitions**
+- transition-all
+- transition-colors
+- transition-shadow
+- transition-transform
 
-### 4.4 AI-Specific Components [Beta]
-- **Streaming Response**: Content fades in with `ease-enter`. Ends with `anim-blink` text cursor `▌`.
-- **Reasoning Indicator**: Collapsible accordion. Title pulses `anim-pulse` during generation.
-- **Citation Badge**: Tiny pill badge (`radius-pill`), `color-surface-bright`.
-- **Confidence Badge**: Green/Yellow/Red indicator alongside AI generation scores.
-- **Processing State**: Skeleton loaders strictly matching the resulting text geometry.
-- **Provider Badge**: Distinct visual tag identifying the active LLM (e.g., Groq, LLaMA).
+## 12. Layout System
+**Desktop**
+- Sidebar + Top Content + Responsive Grid
 
-### 4.5 AI Transparency [Mandatory]
-Generated content must permanently display its lineage:
-- **Generated By**: Identifies the AI agent.
-- **Timestamp**: Exact generation time.
-- **Provider**: The underlying model.
-- **Version**: The Prompt/System Config version used.
+**Grid**
+- 12-column responsive
 
-### 4.6 Empty & Error States [Stable]
-**Empty States** must always include:
-1. `24px+` Icon
-2. `Title` typography
-3. `Body` description explaining *why* it's empty
-4. Primary Action Button
-5. (Optional) Ghost Secondary Action
+**Sections**
+- Hero
+- Metrics
+- Main Workspace
+- Sidebar Panels
+- Footer Navigation
 
-**Error States** are strictly differentiated:
-- **Recoverable**: Clear CTA to retry/fix (e.g., "Reload Data").
-- **System**: Fatal errors. Displayed in full-screen modals.
-- **Validation**: Inline red borders on form inputs.
-- **Permission**: "Access Denied" with `color-warning` iconography.
-- **Network**: Toast notification indicating offline status.
+## 13. Responsive Breakpoints
+**Primary**
+- Mobile
+- Tablet
+- Desktop
 
----
+**Tailwind**
+- md
+- lg
 
-## 5. File Structure Architecture
+**Mobile Features**
+- Bottom Navigation
+- Compact Header
+- Single Column Layout
 
-Regardless of the underlying framework (Streamlit, React, HTML), the CSS architecture maps to this official structure:
-```text
-styles/
-├── tokens.css       # Foundation & Semantic variable definitions
-├── base.css         # Reset, Typography, Accessibility rules, Scrollbars
-├── layout.css       # Grid systems, Density modes, Containers
-├── components/
-│   ├── button.css
-│   ├── card.css
-│   ├── form.css
-│   ├── table.css
-│   └── sidebar.css
-└── utilities.css    # Single-purpose helpers (e.g., .sr-only, .text-center)
+**Desktop**
+- Sidebar Navigation
+- Multi-column Dashboard
+- 3-column Workspace
+
+## 14. Interaction States
+**Buttons**
+- Default
+- Hover
+- Focus
+- Active
+
+**Inputs**
+- Default
+- Focus
+- Filled
+- Disabled
+
+**Cards**
+- Hover Elevation
+- Active Glow
+
+**Navigation**
+- Active
+- Hover
+- Selected
+
+## 15. Visual Style
+- Cyber Professional
+- AI Dashboard
+- Material 3
+- Glass-free
+- Minimal gradients
+- Flat surfaces
+- Cyan accent glow
+- High readability
+- Developer-oriented aesthetic
+- Enterprise SaaS appearance
+
+## 16. Design Tokens Summary
+- Colors: 40+ semantic color tokens
+- Typography: 5 text styles across 3 font families
+- Spacing: 4px-based spacing scale
+- Border Radius: 4 radius tokens
+- Elevation: 4 shadow/glow levels
+- Motion: Pulse, blink, hover, transitions
+- Components: 20+ reusable UI components
+- Icons: Material Symbols
+- Layout: Responsive dashboard with sidebar, grids, cards, and mobile navigation
+- Accessibility: High-contrast dark theme, semantic colors, clear typography hierarchy, and focus states
+
+## 17. Version 1.0 Freeze Rules (Single Source of Truth)
+
+**Visual Identity Restrictions**
+- Material Design 3 inspired
+- Glass-free
+- Cyan accent
+- Minimal gradients
+- Flat surfaces
+- Developer tooling aesthetics
+- Professional appearance
+- **Prohibited Effects**: Glassmorphism, Aurora backgrounds, Mesh gradients, Floating cards, Neumorphism, Animated particles, Excessive blur, Multiple accent colors, Random CSS frameworks.
+
+**Strict CSS Value Constraints**
+- **Colors**: Use only the semantic tokens defined above (`--c-primary`, `--c-background`, etc). Never use raw hex colors inside components.
+- **Typography**: Space Grotesk, Geist, JetBrains Mono ONLY.
+- **Spacing**: Strictly 4, 8, 16, 24, 40px. No arbitrary spacing (7px, 13px, etc).
+- **Radius**: Strictly 2, 4, 8, 12px. Avoid pill shapes unless explicitly defined.
+- **Shadows**: Border, Border+Shadow, Glow, Accent Glow. No heavy floating effects.
+- **Motion**: Hover, Focus, Pulse, Blink, Transition. No page-wide animations, floating motion, or decorative movement.
+
+**Implementation Philosophy**
+- `Design Tokens -> Theme -> Base Components -> Reusable UI Components -> Pages`
+- **Prohibited**: `Page -> Inline CSS -> Random Styles`
+
+**Enforced File Architecture**
+The Streamlit application frontend must be structured EXACTLY as follows:
 ```
-
----
-
-## 6. Design QA Checklist
-
-Before merging any UI changes, developers must verify:
-- [ ] **Spacing**: Exclusively uses 4px baseline `space-*` tokens.
-- [ ] **Contrast**: Text passes WCAG 2.2 AA (4.5:1).
-- [ ] **Focus**: Every interactive element uses `--t-focus-ring`.
-- [ ] **Responsive**: Layout scales correctly on Mobile, Tablet, and Desktop.
-- [ ] **Overflow**: No horizontal layout shifting or clipped text. Scrollbars styled correctly.
-- [ ] **Colors**: Absolutely zero hardcoded hex values in the component.
-
----
-
-> [!IMPORTANT]
-> **Freeze the Design Language**
-> The visual identity, semantic token architecture, typography system, spacing scale, elevation model, motion language, and component behavior defined in this specification constitute the baseline design language of Traveler LLM. Future iterations should extend this system through additive, versioned changes rather than introducing parallel styles, duplicate tokens, or conflicting interaction patterns.
+src/ui/
+├── styles.py          # Theme + CSS injection
+├── tokens.py          # Design tokens
+├── layout.py          # Page layout helpers
+├── components.py      # Cards, metrics, badges, buttons
+├── icons.py           # Material Symbols helpers
+├── animations.py      # Motion utilities
+└── theme.py           # Theme configuration
+```
+app.py should only assemble the interface using these reusable helpers, not contain styling logic. Every UI change must use existing tokens, follow typography/spacing/component systems, and remain compatible with native Streamlit.

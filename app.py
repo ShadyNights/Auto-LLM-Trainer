@@ -26,8 +26,7 @@ from src.infrastructure.logging.json_logger import get_json_logger
 from src.ui.styles import inject_styles
 from src.ui.components import (
     render_header, render_metric, render_empty_state, 
-    render_badge, render_section, render_loading, render_card,
-    render_ai_transparency_footer
+    render_badge, render_section, render_loading, render_card
 )
 
 load_dotenv(override=True)
@@ -108,11 +107,11 @@ try:
         # 2. Health
         render_section("System Health", icon="⚙️")
         if warnings:
-            st.markdown(render_badge("Degraded", "warning"), unsafe_allow_html=True)
+            st.markdown(render_badge("Degraded", "error"), unsafe_allow_html=True)
             for w in warnings:
                 st.caption(f"⚠️ {w}")
         else:
-            st.markdown(render_badge("Operational", "success"), unsafe_allow_html=True)
+            st.markdown(render_badge("Operational", "primary"), unsafe_allow_html=True)
         st.markdown("<hr/>", unsafe_allow_html=True)
             
         # 3. Configuration
@@ -138,12 +137,12 @@ try:
                     
                     rating = metrics.get('average_rating', 0)
                     rating_str = f"{rating:.1f}" if rating else "N/A"
-                    render_metric("Avg Rating", rating_str, "Stable", "info")
+                    render_metric("Avg Rating", rating_str, "Stable", "neutral")
                     st.markdown("<br/>", unsafe_allow_html=True)
                     
                     fails = metrics.get('generation_failures', 0)
                     fail_trend = "Needs Review" if fails > 0 else "Optimal"
-                    fail_color = "error" if fails > 0 else "success"
+                    fail_color = "error" if fails > 0 else "primary"
                     render_metric("Gen Failures", str(fails), fail_trend, fail_color)
         except Exception:
             render_metric("Metrics", "Offline", "DB Error", "error")
@@ -216,32 +215,23 @@ try:
         tab1, tab2, tab3 = st.tabs(["📝 Itinerary", "⚙️ Analytics", "⭐ Feedback"])
         
         with tab1:
-            from datetime import datetime
-            
             result_html = f"{st.session_state.itinerary}"
-            result_html += render_ai_transparency_footer(
-                provider="Groq",
-                model="llama-3.3-70b",
-                prompt_version="v1",
-                config_version="v1",
-                timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            )
-            render_card(result_html, ai_glow=True)
+            render_card(result_html, active_glow=True)
             
         with tab2:
             analytics_html = f"""
-            <div class="flex flex-col gap-4">
+            <div class="l-stack">
                 <div>
-                    <p class="text-muted" style="margin:0;">Itinerary ID</p>
-                    <p class="text-primary" style="font-family:monospace; margin:0;">{st.session_state.itinerary_id}</p>
+                    <p style="margin:0;">Itinerary ID</p>
+                    <p style="font-family:monospace; margin:0; color:var(--c-primary);">{st.session_state.itinerary_id}</p>
                 </div>
                 <div>
-                    <p class="text-muted" style="margin:0;">Correlation ID</p>
-                    <p class="text-primary" style="font-family:monospace; margin:0;">{st.session_state.corr_id}</p>
+                    <p style="margin:0;">Correlation ID</p>
+                    <p style="font-family:monospace; margin:0; color:var(--c-primary);">{st.session_state.corr_id}</p>
                 </div>
                 <div>
-                    <p class="text-muted" style="margin:0;">Status</p>
-                    {render_badge('Pipeline Queued', 'info')}
+                    <p style="margin:0;">Status</p>
+                    {render_badge('Pipeline Queued', 'primary')}
                 </div>
             </div>
             """
