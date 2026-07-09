@@ -17,8 +17,10 @@ def get_layout_css() -> str:
         padding-top: 2rem !important;
         padding-bottom: 2rem !important;
     }
+    
+    /* Make header transparent so it doesn't block UI but remains clickable */
     header[data-testid="stHeader"] {
-        display: none !important;
+        background-color: transparent !important;
     }
     
     .l-mb-md { margin-bottom: var(--space-md); }
