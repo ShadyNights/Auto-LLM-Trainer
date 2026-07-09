@@ -11,7 +11,7 @@ def render_hero_dashboard(metrics_data: Optional[dict]):
     render_header(
         title="Traveler LLM", 
         subtitle="Automated itinerary curation powered by a Continuous Feedback Learning Pipeline.",
-        icon="✈️"
+        icon="flight_takeoff"
     )
     
     # Render KPI metrics horizontally below the header
@@ -51,7 +51,7 @@ def render_results_dashboard(itinerary_text: str, itinerary_id: str, corr_id: st
     render_spacer(1)
     render_section("Generated Results", "Your requested itinerary is ready.")
     
-    tab1, tab2, tab3 = st.tabs(["📝 Itinerary", "⚙️ Analytics", "⭐ Feedback"])
+    tab1, tab2, tab3 = st.tabs(["Itinerary", "Analytics", "Feedback"])
     
     with tab1:
         render_itinerary_card(itinerary_text)
