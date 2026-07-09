@@ -24,9 +24,10 @@ from src.infrastructure.logging.json_logger import get_json_logger
 
 # UI Components
 from src.ui.styles import inject_styles
+from src.ui.layout import render_header, render_section
 from src.ui.components import (
-    render_header, render_metric, render_empty_state, 
-    render_badge, render_section, render_loading, render_card
+    render_metric, render_empty_state, 
+    render_badge, render_loading, render_card
 )
 
 load_dotenv(override=True)
