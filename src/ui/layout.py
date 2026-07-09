@@ -12,6 +12,15 @@ def get_layout_css() -> str:
         border-right: 1px solid var(--c-outline-variant) !important;
     }
     
+    /* Streamlit Main Container Top Padding Reduction */
+    .block-container {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+    }
+    header[data-testid="stHeader"] {
+        display: none !important;
+    }
+    
     .l-mb-md { margin-bottom: var(--space-md); }
     .l-mb-lg { margin-bottom: var(--space-lg); }
     .l-icon { margin-right: var(--space-sm); }
