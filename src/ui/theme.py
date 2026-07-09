@@ -6,7 +6,7 @@ def get_theme_css() -> str:
        ========================================================================= */
     .stApp {
         background-color: var(--c-background) !important;
-        color: var(--c-primary) !important;
+        color: var(--c-secondary) !important;
         font-family: 'Geist', -apple-system, sans-serif;
         font-size: var(--text-body);
         line-height: 1.6;
