@@ -20,20 +20,23 @@ def _generate_css_variables() -> str:
         
     # 4. Motion
     for key, value in motion.principles.items():
-        if key != "loading": # Loading is a complex animation, not a single easing string
+        if key != "loading":
             css_vars.append(f"        --motion-{key}: {value};")
 
     return "\n".join(css_vars)
 
 
 def get_global_css() -> str:
-    """Generates the unified Design System CSS."""
+    """Generates the unified Design System CSS with Aggressive Native Overrides."""
     
     css = f"""
 <style>
     /* =========================================================================
        1. COMPILED DESIGN TOKENS
        ========================================================================= */
+       
+    @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+    
     :root {{
 {_generate_css_variables()}
     }}
@@ -51,139 +54,153 @@ def get_global_css() -> str:
     {motion.keyframes}
 
     /* =========================================================================
-       2. TYPOGRAPHY (5-Level System)
+       2. TYPOGRAPHY (Native Streamlit Override)
        ========================================================================= */
        
-    @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
-    
-    .stApp {{
-        background-color: var(--color-bg-base);
-        color: var(--color-text-primary);
-        font-family: {typography.FONT_FAMILY};
-        -webkit-font-smoothing: antialiased;
+    /* Force Geist onto all generic elements */
+    .stApp, .stApp p, .stApp span, .stApp div, .stApp label, .stApp input, .stApp textarea, .stApp button {{
+        font-family: {typography.levels['body']['font-family']} !important;
     }}
     
     /* Apply Typography Levels */
-    .type-display {{
-        font-family: {typography.levels['display']['font-family']};
-        font-size: {typography.levels['display']['font-size']};
-        font-weight: {typography.levels['display']['font-weight']};
-        line-height: {typography.levels['display']['line-height']};
-        letter-spacing: {typography.levels['display']['letter-spacing']};
+    .type-display, [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2 {{
+        font-family: {typography.levels['display']['font-family']} !important;
+        font-size: {typography.levels['display']['font-size']} !important;
+        font-weight: {typography.levels['display']['font-weight']} !important;
+        line-height: {typography.levels['display']['line-height']} !important;
+        letter-spacing: {typography.levels['display']['letter-spacing']} !important;
+        color: var(--color-text-primary);
     }}
+    
     h1, .type-heading {{
-        font-family: {typography.levels['heading']['font-family']};
-        font-size: {typography.levels['heading']['font-size']};
-        font-weight: {typography.levels['heading']['font-weight']};
-        line-height: {typography.levels['heading']['line-height']};
-        letter-spacing: {typography.levels['heading']['letter-spacing']};
+        font-family: {typography.levels['heading']['font-family']} !important;
+        font-size: {typography.levels['heading']['font-size']} !important;
+        font-weight: {typography.levels['heading']['font-weight']} !important;
+        line-height: {typography.levels['heading']['line-height']} !important;
+        letter-spacing: {typography.levels['heading']['letter-spacing']} !important;
         color: var(--color-text-primary);
     }}
     h2, h3, .type-title {{
-        font-family: {typography.levels['title']['font-family']};
-        font-size: {typography.levels['title']['font-size']};
-        font-weight: {typography.levels['title']['font-weight']};
-        line-height: {typography.levels['title']['line-height']};
+        font-family: {typography.levels['title']['font-family']} !important;
+        font-size: {typography.levels['title']['font-size']} !important;
+        font-weight: {typography.levels['title']['font-weight']} !important;
+        line-height: {typography.levels['title']['line-height']} !important;
         color: var(--color-text-primary);
     }}
     p, .type-body {{
-        font-family: {typography.levels['body']['font-family']};
-        font-size: {typography.levels['body']['font-size']};
-        font-weight: {typography.levels['body']['font-weight']};
-        line-height: {typography.levels['body']['line-height']};
+        font-family: {typography.levels['body']['font-family']} !important;
+        font-size: {typography.levels['body']['font-size']} !important;
+        font-weight: {typography.levels['body']['font-weight']} !important;
+        line-height: {typography.levels['body']['line-height']} !important;
         color: var(--color-text-secondary);
     }}
     small, .type-caption {{
-        font-family: {typography.levels['caption']['font-family']};
-        font-size: {typography.levels['caption']['font-size']};
-        font-weight: {typography.levels['caption']['font-weight']};
-        text-transform: {typography.levels['caption']['text-transform']};
-        letter-spacing: {typography.levels['caption']['letter-spacing']};
+        font-family: {typography.levels['caption']['font-family']} !important;
+        font-size: {typography.levels['caption']['font-size']} !important;
+        font-weight: {typography.levels['caption']['font-weight']} !important;
+        text-transform: {typography.levels['caption']['text-transform']} !important;
+        letter-spacing: {typography.levels['caption']['letter-spacing']} !important;
         color: var(--color-text-muted);
     }}
 
     /* =========================================================================
-       3. COMPONENT PRIMITIVES & ELEVATION
+       3. NATIVE COMPONENT OVERRIDES (Tailwind Sync)
        ========================================================================= */
        
+    /* Hide top header spacing */
+    [data-testid="stHeader"] {{
+        display: none !important;
+    }}
+    
+    /* Layout Container (Remove native padding for edge-to-edge Tailwind) */
+    .block-container {{
+        padding-top: var(--space-8) !important;
+        padding-left: var(--space-6) !important;
+        padding-right: var(--space-6) !important;
+        max-width: 1440px !important;
+    }}
+       
+    /* Sidebar Strict Override */
+    [data-testid="stSidebar"] {{
+        background-color: var(--color-bg-surface-lowest) !important;
+        border-right: 1px solid var(--color-border-default) !important;
+        width: 288px !important; /* 72 Tailwind rem */
+    }}
+    
+    [data-testid="stSidebar"] > div:first-child {{
+        padding: var(--space-8) var(--space-4) !important;
+    }}
+    
+    /* Inputs Override (Tailwind text inputs) */
+    .stTextInput > div > div > input, 
+    .stSelectbox > div > div > div,
+    .stNumberInput > div > div > input,
+    .stTextArea > div > div > textarea {{
+        background-color: var(--color-bg-surface-low) !important;
+        border: 1px solid var(--color-border-default) !important;
+        color: var(--color-text-primary) !important;
+        border-radius: var(--radius-md) !important;
+        min-height: 44px !important;
+        font-size: 16px !important;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+        transition: border-color var(--motion-focus), box-shadow var(--motion-focus) !important;
+    }}
+    
+    /* Input Focus Rings (Cyan Primary Container) */
+    .stTextInput > div > div > input:focus, 
+    .stSelectbox > div > div > div:focus-within,
+    .stTextArea > div > div > textarea:focus {{
+        border-color: var(--color-accent-primary) !important;
+        box-shadow: 0 0 0 1px var(--color-accent-primary) !important;
+    }}
+    
+    /* Button Override */
+    .stButton > button {{
+        background-color: var(--color-bg-surface-high) !important;
+        border: 1px solid var(--color-border-default) !important;
+        color: var(--color-text-primary) !important;
+        border-radius: var(--radius-md) !important;
+        font-weight: 500 !important;
+        min-height: 40px !important;
+        transition: all var(--motion-hover) !important;
+    }}
+    
+    .stButton > button:hover {{
+        background-color: var(--color-bg-surface-highest) !important;
+        border-color: var(--color-border-hover) !important;
+    }}
+    
+    /* Primary CTA Button Override (Generate Premium Itinerary) */
+    [data-testid="stFormSubmitButton"] > button,
+    .stButton > button[data-baseweb="button"]:has(p:contains("New Itinerary")) {{
+        background-color: var(--color-accent-primary) !important;
+        color: var(--color-text-on-primary) !important;
+        border: none !important;
+        font-weight: 700 !important;
+        box-shadow: 0 0 15px rgba(0, 224, 255, 0.2) !important;
+    }}
+    
+    [data-testid="stFormSubmitButton"] > button:hover,
+    .stButton > button[data-baseweb="button"]:has(p:contains("New Itinerary")):hover {{
+        background-color: var(--color-accent-active) !important;
+        box-shadow: 0 0 20px rgba(0, 224, 255, 0.4) !important;
+        transform: translateY(-1px);
+    }}
+
+    /* Custom Primitives */
     .surface {{
-        background-color: var(--color-bg-surface);
+        background-color: var(--color-bg-surface-high);
         border: 1px solid var(--color-border-default);
-        border-radius: var(--radius-md);
+        border-radius: var(--radius-lg);
         box-shadow: {elevation.levels['surface']['box-shadow']};
-        z-index: {elevation.levels['surface']['z-index']};
-        transition: transform var(--motion-hover), box-shadow var(--motion-hover), border-color var(--motion-hover);
     }}
     
-    .surface-raised {{
-        background-color: var(--color-bg-surface-raised);
-        box-shadow: {elevation.levels['raised']['box-shadow']};
-        z-index: {elevation.levels['raised']['z-index']};
-    }}
-    
-    /* Interactive Card Override */
     .surface-interactive:hover {{
         border-color: var(--color-border-hover);
         transform: translateY(-2px);
         box-shadow: {elevation.levels['raised']['box-shadow']};
     }}
 
-    /* =========================================================================
-       4. ACCESSIBILITY & NATIVE OVERRIDES
-       ========================================================================= */
-       
-    /* Minimum touch target (44x44) & Focus Rings */
-    *:focus-visible {{
-        outline: 2px solid var(--color-accent-primary) !important;
-        outline-offset: 2px !important;
-    }}
-    
-    .stButton > button {{
-        min-height: 44px; /* Touch target */
-        background-color: var(--color-bg-surface-raised);
-        color: var(--color-text-primary);
-        border: 1px solid var(--color-border-default);
-        border-radius: var(--radius-md);
-        font-weight: 500;
-        transition: all var(--motion-hover);
-        width: 100%;
-    }}
-    .stButton > button:hover {{
-        border-color: var(--color-border-hover);
-        background-color: var(--color-bg-surface-raised);
-    }}
-    
-    /* Primary CTA */
-    [data-testid="stFormSubmitButton"] > button {{
-        background-color: var(--color-accent-primary);
-        color: #ffffff !important;
-        border: none;
-    }}
-    [data-testid="stFormSubmitButton"] > button:hover {{
-        background-color: var(--color-accent-hover);
-    }}
-
-    /* Inputs */
-    .stTextInput > div > div > input, 
-    .stSelectbox > div > div > div,
-    .stNumberInput > div > div > input,
-    .stTextArea > div > div > textarea {{
-        min-height: 44px;
-        background-color: var(--color-bg-surface) !important;
-        border: 1px solid var(--color-border-default) !important;
-        color: var(--color-text-primary) !important;
-        border-radius: var(--radius-md);
-        transition: border-color var(--motion-focus), box-shadow var(--motion-focus);
-    }}
-    
-    .stTextInput > div > div > input:focus, 
-    .stSelectbox > div > div > div:focus-within,
-    .stTextArea > div > div > textarea:focus {{
-        border-color: var(--color-accent-primary) !important;
-        box-shadow: 0 0 0 2px var(--color-accent-subtle) !important;
-    }}
-
-    /* Badges */
     .badge {{
         display: inline-flex;
         align-items: center;
@@ -191,6 +208,8 @@ def get_global_css() -> str:
         border-radius: var(--radius-full);
         font-size: 0.75rem;
         font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
     }}
     .badge-success {{ background: var(--color-status-success-subtle); color: var(--color-status-success); }}
     .badge-warning {{ background: var(--color-status-warning-subtle); color: var(--color-status-warning); }}

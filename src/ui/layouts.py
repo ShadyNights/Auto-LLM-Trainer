@@ -6,10 +6,10 @@ class BaseLayout:
     """Provides standard layout constraints and injections."""
     @staticmethod
     def setup_page(title: str):
-        st.set_page_config(page_title=title, page_icon=Icons.ROBOT, layout="wide")
+        st.set_page_config(page_title=title, page_icon="✈️", layout="wide")
         
         # Inject custom Material Symbols font requirement to ensure icons load properly
-        st.markdown("""
+        st.html("""
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
         <style>
             .material-symbols-outlined {
@@ -29,40 +29,44 @@ class BaseLayout:
                 -webkit-font-smoothing: antialiased;
             }
         </style>
-        """, unsafe_allow_html=True)
+        """)
 
 class SidebarLayout:
     @staticmethod
     def render(session_id: str, warnings: list = None):
         with st.sidebar:
+            st.html("<div style='margin-bottom: var(--space-6);'><span class='type-display' style='font-size: 24px; color: var(--color-accent-primary); letter-spacing: -0.02em;'>Traveler LLM</span></div>")
+            
             components.render_user_profile()
             
             st.button("New Itinerary", use_container_width=True, type="primary", icon=Icons.ADD)
-            st.markdown("<hr style='margin: var(--space-4) 0;'/>", unsafe_allow_html=True)
+            
+            st.html("<div style='margin: var(--space-6) 0;'></div>")
             
             # Workspace Group
-            st.markdown("<span class='type-caption'>Workspace</span>", unsafe_allow_html=True)
-            st.markdown(f"**{Icons.DASHBOARD} Dashboard**")
-            st.markdown(f"{Icons.ROBOT} Itinerary Planner")
-            st.markdown(f"{Icons.MAP} Active Trips")
+            st.html("<span class='type-caption' style='padding-left: var(--space-4); margin-bottom: var(--space-2); display: block;'>Workspace</span>")
+            components.render_sidebar_link("Dashboard", Icons.DASHBOARD, is_active=False)
+            components.render_sidebar_link("Itinerary Planner", Icons.SPARKLES, is_active=True)
+            components.render_sidebar_link("Active Trips", Icons.MAP, is_active=False)
             
-            st.markdown("<hr style='margin: var(--space-4) 0;'/>", unsafe_allow_html=True)
+            st.html("<div style='margin: var(--space-6) 0;'></div>")
             
             # Operations Group
-            st.markdown("<span class='type-caption'>Operations</span>", unsafe_allow_html=True)
-            st.markdown(f"{Icons.SETTINGS} Configuration")
-            st.markdown(f"<span class='type-caption'>Session: {str(session_id)[:8]}...</span>", unsafe_allow_html=True)
+            st.html("<span class='type-caption' style='padding-left: var(--space-4); margin-bottom: var(--space-2); display: block;'>Operations</span>")
+            components.render_sidebar_link("System Health", Icons.HEARTBEAT, is_active=False)
+            components.render_sidebar_link("Configuration", Icons.SETTINGS, is_active=False)
             
+            st.html("<div style='margin-top: auto; border-top: 1px solid var(--color-border-default); padding-top: var(--space-4);'></div>")
+            
+            components.render_sidebar_link("Help", Icons.HELP, is_active=False)
+            components.render_sidebar_link("Feedback", Icons.FEEDBACK, is_active=False)
+
             if warnings:
-                st.markdown("<div style='margin-top: var(--space-4);'>", unsafe_allow_html=True)
+                st.html("<div style='margin-top: var(--space-4);'>")
                 components.render_badge("Degraded", "warning")
                 for w in warnings:
                     st.caption(f"⚠️ {w}")
-                st.markdown("</div>", unsafe_allow_html=True)
-            else:
-                st.markdown("<div style='margin-top: var(--space-4);'>", unsafe_allow_html=True)
-                components.render_badge("Operational", "success")
-                st.markdown("</div>", unsafe_allow_html=True)
+                st.html("</div>")
 
 class DashboardLayout:
     @staticmethod
@@ -80,7 +84,7 @@ class DashboardLayout:
             components.render_metric(
                 label="Total Conversations", 
                 value=str(metrics.get('total_conversations', 0)),
-                icon="forum",
+                icon=Icons.FORUM,
                 trend="+12% this week",
                 trend_positive=True
             )
@@ -90,7 +94,7 @@ class DashboardLayout:
             components.render_metric(
                 label="Avg Rating", 
                 value=rating_str,
-                icon="star",
+                icon=Icons.STAR,
                 trend="Consistent High Quality",
                 trend_positive=True
             )
@@ -100,7 +104,7 @@ class DashboardLayout:
             components.render_metric(
                 label="Gen Failures", 
                 value=str(fails),
-                icon="bug_report",
+                icon=Icons.BUG,
                 trend=trend,
                 trend_positive=(fails == 0)
             )
@@ -108,7 +112,7 @@ class DashboardLayout:
 class PlannerLayout:
     @staticmethod
     def render_configuration_section():
-        st.markdown("<h2 class='type-heading' style='margin-top: var(--space-8); margin-bottom: var(--space-4);'><span class='material-symbols-outlined'>tune</span> Configure Request</h2>", unsafe_allow_html=True)
+        st.html("<h2 class='type-heading' style='margin-top: var(--space-8); margin-bottom: var(--space-4); display: flex; align-items: center; gap: var(--space-2);'><span class='material-symbols-outlined' style='color: var(--color-text-muted);'>tune</span> Configure Request</h2>")
 
 class ResultLayout:
     @staticmethod
@@ -116,6 +120,6 @@ class ResultLayout:
         components.render_page_header(
             title=f"{city.title()}",
             subtitle=f"{days} Days • AI Curated Journey",
-            icon="map",
+            icon=Icons.MAP,
             status_badge="Generation Complete"
         )

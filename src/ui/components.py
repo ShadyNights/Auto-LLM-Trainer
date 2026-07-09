@@ -31,6 +31,26 @@ def render_user_profile(name: str = "Modern AI Professional", role: str = "Pro A
     """
     st.html(textwrap.dedent(html))
 
+def render_sidebar_link(label: str, icon: str, is_active: bool = False):
+    """Sidebar navigation link styled identically to Tailwind mockups."""
+    clean_icon = icon.replace(":material/", "").replace(":", "")
+    
+    if is_active:
+        html = f"""
+        <div style="display: flex; align-items: center; gap: var(--space-4); background-color: var(--color-accent-primary); color: #00363f; border-radius: var(--radius-lg); padding: var(--space-3) var(--space-4); margin-bottom: var(--space-2); cursor: pointer; box-shadow: 0 0 10px rgba(0,224,255,0.15); transition: all 0.2s;">
+            <span class="material-symbols-outlined" style="font-size: 20px; font-variation-settings: 'FILL' 1;">{clean_icon}</span>
+            <span class="type-body" style="margin: 0; color: #00363f; font-weight: 700; font-size: 14px;">{label}</span>
+        </div>
+        """
+    else:
+        html = f"""
+        <div style="display: flex; align-items: center; gap: var(--space-4); color: var(--color-text-secondary); border-radius: var(--radius-lg); padding: var(--space-3) var(--space-4); margin-bottom: var(--space-2); cursor: pointer; transition: all 0.2s;" onmouseover="this.style.backgroundColor='var(--color-bg-surface-high)'; this.style.color='var(--color-text-primary)'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--color-text-secondary)'">
+            <span class="material-symbols-outlined" style="font-size: 20px;">{clean_icon}</span>
+            <span class="type-body" style="margin: 0; font-size: 14px;">{label}</span>
+        </div>
+        """
+    st.html(textwrap.dedent(html))
+
 def render_metric(label: str, value: str, icon: str, trend: str = None, trend_positive: bool = True):
     """Analytics metric card mimicking Tailwind grid layout."""
     trend_color = "var(--color-status-success)" if trend_positive else "var(--color-status-error)"
