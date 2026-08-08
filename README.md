@@ -1,71 +1,208 @@
 # Traveler LLM
 
-Traveler LLM is a production-grade AI Travel Planner powered by a **Continuous Feedback Learning Pipeline**.   
+> AI-powered travel itinerary generation with feedback-driven quality improvement.
 
-Unlike simple wrapper applications, Traveler LLM features an event-driven architecture that automatically captures user feedback, evaluates generated itineraries, and queues high-quality interactions to evolve its dataset and inference configurations.
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14-blue.svg)](https://www.postgresql.org/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.39-FF4B4B.svg)](https://streamlit.io/)
+[![Groq](https://img.shields.io/badge/Groq-API-f55036.svg)](https://groq.com/)
+[![Docker](https://img.shields.io/badge/Docker-Supported-2496ED.svg)](https://www.docker.com/)
 
-> **Note**: This architecture is designed to build datasets and promote inference configurations (prompts and provider settings). While it does not automatically retrain foundation model weights today, the pipeline exposes a clean pluggable interface for future LoRA/SFT trainer integration.
+A modular travel-planning application that generates personalized itineraries from destination, duration, interests, budget, and travel style, while capturing user feedback and operational telemetry for continuous improvement.
 
-## Architecture Highlights
-- **Single Source of Truth**: PostgreSQL handles all operational data, state, events, and background queues.
-- **Repository Pattern**: Strict decoupling of SQL queries from business logic.
-- **Provider Abstraction**: A unified `ProviderInterface` currently supporting Groq, designed for trivial expansion to OpenAI or Gemini.
-- **Continuous Feedback Learning Pipeline**: Independent stages (`Collect`, `Dataset`, `Evaluate`, `Promote`, `Cleanup`) that asynchronously process the `training_queue`.
-- **Operational Readiness**: Structured JSON logging, Domain-Specific Exceptions, Dead Letter Queues (DLQ), and Health Checks.
+## Overview
+Traveler LLM is a modular AI travel-planning application that generates personalized itineraries from destination, trip duration, interests, budget, and travel style. It persists trips, itineraries, feedback, telemetry, and training-related data in PostgreSQL and uses a provider abstraction for LLM inference.
 
----
+## Key Capabilities
+- Personalized itinerary generation
+- Configurable LLM provider integration
+- Structured trip and itinerary persistence
+- User ratings and qualitative feedback
+- Event and generation telemetry
+- Analytics and operational dashboards
+- Training-data collection and queueing
+- Docker-based local deployment
 
-## Installation & Deployment
+## How It Works
+```mermaid
+flowchart LR
+    A[User Input] --> B[Planner Service]
+    B --> C[Groq LLM]
+    C --> D[Itinerary Generation]
+    D --> E[User Feedback]
+    E --> F[Learning Queue]
+```
+- Users provide destination, dates, and preferences via the Streamlit UI.
+- The input is passed to the Planner Service, which constructs a prompt.
+- The Groq provider handles LLM inference.
+- Generated itineraries are stored in PostgreSQL.
+- Users can rate the itineraries and provide feedback.
+- Telemetry and feedback are captured and added to a training queue for background processing.
 
-We strongly recommend deploying Traveler LLM via Docker Compose, which seamlessly orchestrates the Streamlit application and the PostgreSQL database.
+## Architecture
+Traveler LLM follows a modular-monolith architecture with clear separation between presentation, application services, repositories, infrastructure, and LLM provider integrations.
+
+```text
+┌─────────────────────┐
+│    Streamlit UI     │
+├─────────────────────┤
+│ Application Services│
+├─────────────────────┤
+│    Repositories     │
+├─────────────────────┤
+│   Infrastructure    │
+├─────────────────────┤
+│ PostgreSQL │ LLM API │
+└─────────────────────┘
+```
+
+## Tech Stack
+| Layer | Technology |
+|---|---|
+| Language | Python |
+| UI | Streamlit |
+| Database | PostgreSQL 14 |
+| Database Driver | psycopg2 |
+| LLM Provider | Groq |
+| Containerization | Docker / Docker Compose |
+| Testing | pytest |
+| CI | GitHub Actions |
+| Configuration | Environment variables + database configuration |
+
+## Project Structure
+```text
+traveler-llm/
+├── src/
+│   ├── domain/
+│   ├── infrastructure/
+│   ├── pipelines/
+│   ├── providers/
+│   ├── repositories/
+│   ├── services/
+│   └── ui/
+├── docs/
+├── migrations/
+├── prompts/
+├── scripts/
+├── .github/
+├── Dockerfile
+├── docker-compose.yml
+├── pyproject.toml
+├── requirements.txt
+└── README.md
+```
+The source tree follows a layered modular architecture separating UI, application logic, domain models, persistence, and infrastructure concerns.
+
+## Getting Started
 
 ### Prerequisites
+- Python 3.10+
 - Docker and Docker Compose
-- A [Groq API Key](https://console.groq.com/)
+- Groq API key
 
-### 1. Configure Environment
-Clone the repository and set up your secure environment variables:
+### 1. Clone
+```bash
+git clone https://github.com/your-org/traveler-llm.git
+cd traveler-llm
+```
+
+### 2. Configure environment
 ```bash
 cp .env.example .env
 ```
-Edit `.env` and insert your `GROQ_API_KEY`. Be sure to set secure passwords for your database user!
-
-### 2. Build and Start
-Run the following command to build the Docker image and start the cluster:
-```bash
-docker-compose up -d --build
-```
-The application will wait for PostgreSQL to become healthy before booting. 
-
-### 3. Initialize the Database Schema
-Once the containers are running, execute the database migrations to set up the tables:
-```bash
-docker-compose exec app python setup_database.py
+Set in `.env`:
+```ini
+GROQ_API_KEY=gsk_your_api_key_here
 ```
 
-### 4. Access the Application
-Navigate to `http://localhost:8501` in your browser.
-
----
-
-## Background Jobs (The Pipeline)
-
-The Continuous Feedback Learning Pipeline runs independently of the web application. You can execute it via the CLI:
+### 3. Start dependencies
 ```bash
-# Run the complete end-to-end pipeline:
-docker-compose exec app python background_jobs.py pipeline
-
-# Or run specific independent stages:
-docker-compose exec app python background_jobs.py train
-docker-compose exec app python background_jobs.py evaluate
-docker-compose exec app python background_jobs.py promote
+docker compose up -d
 ```
 
----
+### 4. Initialize database
+```bash
+docker compose exec app python setup_database.py
+```
 
-## Troubleshooting
+### 5. Run application
+The application is automatically started by Docker Compose. Open your browser to:
+http://localhost:8501
 
-- **Database Connection Failed**: Ensure `docker-compose up` was successful and the `db` service is healthy. Verify the credentials in your `.env` match the compose file variables.
-- **ProviderUnavailable / GROQ_API_KEY error**: Verify your API key is correctly injected into the container via `.env`.
-- **PromptNotFound**: Ensure the `prompts/travel/v1.md` file exists and has not been modified without updating the `prompts_metadata` checksum in the database.
-- **Queue tasks stuck**: If a task fails 5 times, it enters the Dead Letter Queue (`status = 'dead'`). Check the structured JSON logs in `docker-compose logs app` for the exact Python exception.
+## Configuration
+| Variable | Required | Purpose |
+|---|---:|---|
+| `GROQ_API_KEY` | Yes | LLM provider authentication |
+| `DATABASE_URL` | Yes | PostgreSQL connection |
+
+*(Note: Additional configuration variables exist in the database schema but are not yet enforced by the application logic).*
+
+## Continuous Feedback Pipeline
+```text
+User Feedback
+      ↓
+Feedback Persistence
+      ↓
+Training Data
+      ↓
+Dataset Construction
+      ↓
+Evaluation
+      ↓
+Model Promotion
+```
+
+| Stage | Status |
+|---|---|
+| Feedback collection | ✅ Implemented |
+| Training-data queueing | ✅ Implemented |
+| Dataset construction | ⚠️ In progress |
+| Model evaluation | ⚠️ In progress |
+| Model promotion | ⚠️ In progress |
+| Automated model improvement | ⚠️ Not yet production-ready |
+
+## Current Status
+| Area | Status |
+|---|---|
+| Core itinerary generation | ✅ Functional |
+| PostgreSQL persistence | ✅ Implemented |
+| Feedback collection | ✅ Implemented |
+| Telemetry | ✅ Implemented |
+| Docker deployment | ⚠️ Requires remediation |
+| Automated tests | ❌ Not yet implemented |
+| Continuous learning pipeline | ⚠️ Partial |
+| Authentication / RBAC | ⚠️ Not implemented |
+| Production deployment | ❌ Not yet production-ready |
+
+See the [Audit Report](AUDIT_REPORT.md) for more detailed technical status.
+
+## Documentation
+| Document | Purpose |
+|---|---|
+| [Architecture](docs/architecture.md) | System architecture and design decisions |
+| [Deployment Guide](docs/deployment_guide.md) | Deployment and environment configuration |
+| [Operations Guide](docs/operations_guide.md) | Operational procedures and troubleshooting |
+| [Database Documentation](docs/database_schema.md) | Schema and persistence model |
+| [Design System](docs/DESIGN_SYSTEM.md) | UI conventions and components |
+| [ADRs](docs/adr/) | Architecture Decision Records |
+
+## Security
+- Never commit `.env` files or credentials.
+- Store API keys and database credentials through environment/secret management.
+- Do not expose administrative or database-management interfaces publicly.
+- Treat LLM-generated content as untrusted data.
+- Report security issues privately rather than opening a public issue containing sensitive details.
+
+## Development
+Format:
+```bash
+black src
+```
+Lint:
+```bash
+ruff check src
+```
+
+## License
+This project is licensed under the MIT License.
+See [LICENSE](LICENSE) for details.
